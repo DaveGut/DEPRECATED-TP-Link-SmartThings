@@ -1,0 +1,401 @@
+##### TP-Link SmartThings Manager #####
+2018-10-15 - Update to Version 3.6.0
+a. Added 3 new page/icons (@ramiran2)
+b. Improved UI Elements (@ramiran2)
+f. Added Recommended Options (@ramiran2)
+
+2018-10-13 - Update to Version 3.5.0
+a. Added a new page/icons (@ramiran2)
+b. Added icons to paragraph (@ramiran2)
+c. Added Lighting Transition Time control (@ramiran2)
+d. Added Device Refresh Rate control (@ramiran2)
+e. Improved UI Elements (@ramiran2)
+f. Added Recommended Options (@ramiran2)
+
+2018-10-10 - Update to Version 3.4.0
+a. Improved UI Elements (@ramiran2)
+b. Improved logic (@ramiran2)
+c. Added token page (@ramiran2)
+d. Added Status of token to token page (@ramiran2)
+
+2018-10-09 - Update to Version 3.2.5
+a. Improved developer testing page (@ramiran2)
+b. Improved error messages (@ramiran2)
+
+2018-10-08 - Update to Version 3.2.0
+a. Improved developer testing mode (@ramiran2)
+b. Added developer testing page (@ramiran2)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+
+2018-10-08 - Update to Version 3.1.2
+a. Removed developer page from login page as a selectable option as there is no need for it (@ramiran2)
+
+2018-10-08 - Update to Version 3.1.1
+a. Fixed a bug that sent users to the main page instead of the login page if username or password is null (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Improved UI Elements with other small changes (@ramiran2)
+b. Added a changelog page (@ramiran2)
+c. Added a uninstall page (@ramiran2)
+d. Added a about page (@ramiran2)
+e. Improved logic (@ramiran2)
+
+2018-10-01 - Update to Version 2.9.0
+a. Improved UI Elements with other small changes (@ramiran2)
+b. Added a developer page (@ramiran2)
+
+2018-09-28 - Update to Version 2.8.0
+a. Improved UI Elements with other small changes (@ramiran2)
+b. Added a login page (@ramiran2)
+c. Updated Driver Version Variables (@ramiran2)
+d. Added a New Device Handler (@ramiran2)
+
+2018-09-27 - Update to Version 2.7.0
+a. Improved UI Elements with other small changes (@ramiran2)
+b. Updated for new Device Handlers (@ramiran2)
+c. Add Support for the new Smart Thing Application (@ramiran2)
+
+2018-08-28 - Update to Version 2.6.0
+a. Improved UI Elements with other small changes (@ramiran2)
+
+2018-08-27 - Update to Version 2.5.0
+a. Improved UI Elements with other large changes (@ramiran2)
+
+2018-08-22 - Update to Version 2.2.0
+a. Improved UI Elements and updated the app logo plus other small changes (@ramiran2)
+
+2018-08-11 - Update to Version 2.1.0
+a. Updated for Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved app name (@ramiran2)
+c. Added app version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Updated for new release of Device Handlers (@DaveGut)
+
+##### TP-Link Smart Plug #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+c. Removed code from switches (@ramiran2)
+d. Added Energy Monitor Plug to device selector (@ramiran2)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+d. Seperated Device Handler of Smart Plug/Switch (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+##### TP-Link Smart Energy Monitor Plug #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+2018-02-17 - Update to Version 1.9.0
+a. Updated Energy Monitor Functions (@DaveGut)
+b. Allowed for full month collection in previous month (@DaveGut)
+c. Cleaned-up algorithm to use Groovy date. (@DaveGut)
+
+2018-02-19 - Update to Version 1.5.0
+a. Completed Energy Monitor tuning (@DaveGut)
+b. Fixed March 1, 2 issue where data would not be captured (@DaveGut)
+c. Update remaining code. (@DaveGut)
+
+2018-04-22 - Initial Release Version 1.0.0
+a. Update setCurrentDate to eliminate error for some users. (@DaveGut)
+
+##### TP-Link Smart Tunable White Bulb #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@ramiran2)
+b. User file-internal selection of Energy Monitor function enabling. (@ramiran2)
+
+##### TP-Link Smart Tunable White Bulb Energy Monitor #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+2018-02-17 - Update to Version 1.9.0
+a. Updated Energy Monitor Functions (@DaveGut)
+b. Allowed for full month collection in previous month (@DaveGut)
+c. Cleaned-up algorithm to use Groovy date. (@DaveGut)
+
+2018-02-19 - Update to Version 1.5.0
+a. Completed Energy Monitor tuning (@DaveGut)
+b. Fixed March 1, 2 issue where data would not be captured (@DaveGut)
+c. Update remaining code. (@DaveGut)
+
+2018-04-22 - Initial Release Version 1.0.0
+a. Update setCurrentDate to eliminate error for some users. (@DaveGut)
+
+##### TP-Link Smart Soft White Bulb #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+##### TP-Link Smart Soft White Bulb Energy Monitor #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+2018-02-17 - Update to Version 1.9.0
+a. Updated Energy Monitor Functions (@DaveGut)
+b. Allowed for full month collection in previous month (@DaveGut)
+c. Cleaned-up algorithm to use Groovy date. (@DaveGut)
+
+2018-02-19 - Update to Version 1.5.0
+a. Completed Energy Monitor tuning (@DaveGut)
+b. Fixed March 1, 2 issue where data would not be captured (@DaveGut)
+c. Update remaining code. (@DaveGut)
+
+2018-04-22 - Initial Release Version 1.0.0
+a. Update setCurrentDate to eliminate error for some users. (@DaveGut)
+
+##### TP-Link Smart Color Bulb #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+##### TP-Link Smart Color Bulb Energy Monitor #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+2018-02-17 - Update to Version 1.9.0
+a. Updated Energy Monitor Functions (@DaveGut)
+b. Allowed for full month collection in previous month (@DaveGut)
+c. Cleaned-up algorithm to use Groovy date. (@DaveGut)
+
+2018-02-19 - Update to Version 1.5.0
+a. Completed Energy Monitor tuning (@DaveGut)
+b. Fixed March 1, 2 issue where data would not be captured (@DaveGut)
+c. Update remaining code. (@DaveGut)
+
+2018-04-22 - Initial Release Version 1.0.0
+a. Update setCurrentDate to eliminate error for some users. (@DaveGut)
+
+##### TP-Link Smart Dimming Switch #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)
+
+##### TP-Link Smart Switch #####
+2018-10-16 - Update to Version 3.2.0
+a. Added modifcation from original repo (@DaveGut)
+b. Improved Lighting Transition Time / Device Refresh Rate control (@DaveGut)
+
+2018-10-08 - Update to Version 3.1.3
+a. Small tweeks to code (@ramiran2)
+b. Changed icons in clasic mode (@ramiran2)
+
+2018-10-04 - Update to Version 3.1.0
+a. Added Device Health Check via Ping (@ramiran2)
+b. Small tweeks to code (@ramiran2)
+
+2018-09-28 - Update to Version 2.9.0
+a. Added Device Health Check (@ramiran2)
+b. Tweek to support for new tp-link devices (@DaveGut)
+c. Added support for the new Smart Things app (@ramiran2)
+d. Seperated Device Handler of Smart Plug/Switch (@ramiran2)
+
+2018-08-11 - Update to Version 2.5.0
+a. Added Support for update from a repo on smartthings website (@ramiran2)
+b. Improved driver names (@ramiran2)
+c. Added driver version (@ramiran2)
+
+2018-01-31 - Update to Version 2.0.0
+a. Common file content for all bulb implementations, using separate files by model only. (@DaveGut)
+b. User file-internal selection of Energy Monitor function enabling. (@DaveGut)

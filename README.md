@@ -96,7 +96,7 @@ Smart Application Update:
 
 4.  Can actually track Device IPs, therefore (although recommended) static deviceIPs are not required.  Static Bridge IP remains required.
 
-# Update.
+# Update.  Unless you need to, not necessary at this time.  Will cause problems later when managing or installing new devices.
 Update is possible.  It has not been extensively tested due to the complexity.  If the update fails, try a clean re-installation.
 
 1.  The new device handlers will work with the existing Smart App (Service Manager) except if you try to ADD DEVICES.

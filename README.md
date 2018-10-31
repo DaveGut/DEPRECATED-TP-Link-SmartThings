@@ -71,12 +71,11 @@ c.  Installation of Manual Node Installation
   
   5.  You can now use either phone app to control the device.  Prefernces can only be updated on the IDE or the classic app.
 
-
-
 # Version 3.5 Update - 10/31/2018
 
 The Files have been updated to Version 3.5.
 
+Note:  In the Node Applet and Kasa Account installation, DO NOT CHANGE preferences BridgeIP, DeviceIP, nor InstallType.
 Device Handler Changes
 
 1.  Single device handler for Hub or Cloud (now 'Node Applet' or 'Kasa Account').  Added preference installType to accommodate.

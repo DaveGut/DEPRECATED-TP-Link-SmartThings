@@ -11,11 +11,11 @@ c.  Manual Node Installation.  Traditional Hub installation.  Does not use a Sma
 
 # Installation Prequisites:
 
-SmartThings Classic is required for all original installations.  You can then use the new SmartThings.
+A SmartThings Hub, IDE Account and SmartThings Classic are required for all original installations.  After installation, you may (if desired) transition to the new SmartThings phone app.
 
-a.  Kasa Account.  (1) Kasa Account, (2) TP-Link devices in remote mode
+a.  Kasa Account.  (1) Kasa Account, (2) TP-Link devices in remote mode.
 
-b.  Node Applet.  (1) Node.js Bridge, (2) Static IP address for Bridge (recommended for all devices)
+b.  Node Applet.  (1) Node.js Bridge, (2) Static IP address for Bridge (recommended for all devices).
 
 c.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses for the bridge and all devices.
 

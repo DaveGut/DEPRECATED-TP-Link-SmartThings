@@ -98,3 +98,7 @@ Smart Application Update:
 
 # Update.
 Update is possible.  It has not been extensively tested due to the complexity.  If the update fails, try a clean re-installation.
+
+1.  The new device handlers will work with the existing Smart App (Service Manager) except if you try to ADD DEVICES.
+
+2.  The new Smart App requires the new Device Handlers if you are going to perform any functions in the smartapp (it relies on the new naming conventions.

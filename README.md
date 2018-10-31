@@ -34,13 +34,6 @@ a.  Install the relevant installation file(s):
     
     2.  Copy the contents of the relevant file in the 'Device Handler' folder herein.  Paste into the IDE page.
 
-        TP-Link Model:  FileName // Namespace - Name
-        HS100, HS105, HS200, HS210, KP100:  (Cloud) TP-Link Plug-Switch.groovy // davegut - (Hub) TP-Link Plug-Switch
-        HS110, HS115:  (Cloud) TP-Link EnergyMonitor Plug.groovy // davegut - (Hub) TP-Link EnergyMonitor Plug
-        LB100, LB110, LB200, KB100:  (Cloud) TP-Link SoftWhite Bulb.groovy // davegut - (Cloud) TP-Link Softwhite Bulb
-        LB120:  (Cloud) TP-Link TunableWhite Bulb.groovy // davegut - (Cloud) TP-LinkTunableWhite Bulb
-        LB130, L230, KB130:  (Cloud) TP-Link Color Bulb.groovy // davegut - (Cloud) TP-Link Color Bulb
-
     3.  Select "Create".  Select 'Publish' 'For Me'.
     
     4.  For 'Kasa Account' or 'Node Applet' installations, go to the My SmartAps page on the IDE.  Select 'New SmartApp'.  Select 'From Code'.

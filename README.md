@@ -1,4 +1,5 @@
 # TP-Link / Kasa Smart Home Device SmartThings Integration
+(Note:  The previous version is still available at the original locations on this site.)
 There is only one version supporting three integrations:
 
 a.  Kasa Account.  Integration via the user's Kasa Account through the Cloud.  This uses a Smart Application for installation, device communications, and device management.

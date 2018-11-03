@@ -7,7 +7,26 @@ b.  Node Applet.  Smart Application integration via a home wifi Node.JS bridge (
 
 c.  Manual Node Installation.  Traditional Hub installation.  Does not use a Smart Application.
 
-# All three versions are compatible with the new SmartThings phone application.
+# Major changes:
+SmartApplication:
+
+a.  Support hub-based installations; including, (1) finding device IPs and installing, (2) changing the device IP automatically (checked every 5 minutes), and changing the bridge IP.
+
+b.  Added Update Device Preferences to update Bulb Transition Time and Refresh Rate (not available on the new ST phone app).
+
+c.  New help and informaton sections; including, periodic checking for updates.
+
+d.  After initial installation, runs on the new SmartThings phone app.
+
+Device Handlers:
+
+a.  Eliminated the separate Hub and Cloud Handlers.
+
+b.  Still supports manual HUb installations.  When installing will have to select installType = 'Node Applet'
+
+c.  Supports running in new SmartThings phone app.
+
+d.  Eliminated support for the bulb energy monitor versions.  The bulb EM functions are not of great value.  It does provide the useage; however, for 8 hr/day, 30 day/month, the maximum energy for an LB-130 is < 2.6 KWHr (i.e., < 40 cent (US) per month).
 
 # Installation Prequisites:
 
@@ -22,8 +41,6 @@ c.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses for 
 # Installation Instructions
 
 (For interaction with the IDE, look in the SmartThings Community Forum.)
-
-1.  Copy device handlers and in
 
 # Installation (Must use the SmartThings Classic App)
 Installation instruction can be found in the Documentation Folders.  These are step-by-step and are for users new to SmartThings.  However, they have not been modified from the previous version yet.
@@ -41,10 +58,12 @@ a.  Install the relevant installation file(s):
     5.  Copy the contents of 'TP-Link SmartThings Manager.groovy' in the 'Service Manager' folder herein.  Paste into the IDE page.
     
     6.  Seleect 'Create'.  Select 'Publish' 'For Me'
+    
+    7.  For Node Applet installations, copy the new 'TP-LinkHub_v3.js' and (for PC) 'TP-LinkHub_v3.bat' files and install on your hub. 
 
 b.  Installation of 'Kasa Account' or 'Node Applet' integrations.
 
-    1.  From the SmartThings Classic app on your phone, select 'SmartApps', then 'Add a SmartApp'.  Select 'My Apps' at bottom of next page.  Select 'TP-Link SmartThings Manager' from the 'My Apps' page.
+    1.  From the SmartThings Classic phone app, select 'SmartApps', then 'Add a SmartApp'.  Select 'My Apps' at bottom of next page.  Select 'TP-Link SmartThings Manager' from the 'My Apps' page.
     
     2.  'Select Installation Type'.  Tap for the selection of 'Kasa Account' or 'Node Applet'.  Once you select, the program will land on one of two pages
     
@@ -89,7 +108,9 @@ Smart Application Update:
 
 4.  Can actually track Device IPs, therefore (although recommended) static deviceIPs are not required.  Static Bridge IP remains required.
 
-# Update.  Unless you need to, not necessary at this time.  Will cause problems later when managing or installing new devices.
+# Update.  Not necessary until you need to install a new device.
+To support the new SmartThings phone app icon, the previous plug / switch device handler has been replaced by separate plug and switch device handlers.  If you add a plug or switch, you will need to download these new device handlers (while keeping your current handler.
+
 Update is possible.  It has not been extensively tested due to the complexity.  If the update fails, try a clean re-installation.
 
 1.  The new device handlers will work with the existing Smart App (Service Manager) except if you try to ADD DEVICES.

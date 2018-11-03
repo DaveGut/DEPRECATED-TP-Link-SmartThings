@@ -135,7 +135,7 @@ def installed() {
 	log.info "Installing ${device.label}..."
     setRefreshRate(30)
     setLightTransTime("1000")
-	if (getDataValue("installType") == null) { setInstallType("Cloud") }
+	if (getDataValue("installType") == null) { setInstallType("Node Applet") }
 }
 
 def ping() {

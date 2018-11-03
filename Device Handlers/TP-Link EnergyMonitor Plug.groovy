@@ -134,7 +134,7 @@ metadata {
 def installed() {
 	log.info "Installing ${device.label}..."
     setRefreshRate(30)
-	if (getDataValue("installType") == null) { setInstallType("Kasa Account") }
+	if (getDataValue("installType") == null) { setInstallType("Node Applet") }
 }
 
 def ping() {

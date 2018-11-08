@@ -113,7 +113,7 @@ def ping() {
 def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
-    if (getDataValue("installType") == null) { setInstallType("Kasa Account") }
+    if (getDataValue("installType") == null) { setInstallType("Node Applet") }
 	if (refreshRate) { setRefreshRate(refreshRate) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }

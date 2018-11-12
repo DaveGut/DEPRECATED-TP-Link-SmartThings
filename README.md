@@ -1,3 +1,5 @@
+# BETA.  Not ready for prime time.
+
 # TP-Link / Kasa Smart Home Device SmartThings Integration
 (Note:  The previous version is still available at the original locations on this site.)
 

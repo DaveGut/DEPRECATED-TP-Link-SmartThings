@@ -1,876 +1,554 @@
 /*
-TP-Link SmartThings Manager and TP-Link Cloud Connect, 2018 Version 4
-	Copyright 2018 Dave Gutheinz, Anthony Ramirez
-Licensed under the Apache License, Version 2.0 (the "License"); you
-may not use this file except in compliance with the License. You may
-obtain a copy of the License at:
-	http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the License for the specific language governing
-permissions and limitations under the License.
-Discalimer: This Service Manager and the associated Device
-Handlers are in no way sanctioned or supported by TP-Link. All
-development is based upon open-source data on the TP-Link Kasa Devices;
-primarily various users on GitHub.com.*/
+TP-Link Plug and Switch Device Handler, 2018, Version 3
+	Copyright 2018 Dave Gutheinz and Anthony Ramirez
 
-//	====== Application Information =====
-	def textCopyright()	{ return "Copyright© 2018 - Dave Gutheinz, Anthony Ramirez" }
-	def appNamespace() { return "davegut" }
-	def appLabel() { return "TP-Link SmartThings Manager (lite)" }
-	def appVersion() { return "3.5.0" }
-	def appVerDate() { return "11-02-2018" }
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the
+License. You may obtain a copy of the License at:
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, 
+software distributed under the License is distributed on an 
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+either express or implied. See the License for the specific 
+language governing permissions and limitations under the 
+License.
+
+Discalimer:  This Service Manager and the associated Device 
+Handlers are in no way sanctioned or supported by TP-Link.  
+All development is based upon open-source data on the 
+TP-Link devices; primarily various users on GitHub.com.
+
+	===== History ============================================
+2018-10-23	Update to Version 3.5:
+			a.	Compatibility with new SmartThings app.
+            b.	Update capabilities per latest ST definitions
+            	1.	deleted capability polling (depreciated)
+                2.	deleted capability sensor (depreciated)
+				3.	update program to accommodate other items
+			c.	Various changes for updated Service Manager
+           	With great appreciation to Anthony Ramirez for
+            his assistance as well as leading the development
+            of the new Service Manager.
+    
+//	====== Device Namespace =====*/
+	def devNamespace()	{ return "davegut" }
+//	def devNamespace()	{ return "ramiran2" }
+//	========Other System Value ===============================
+	def deviceType() { return "Energy Monitor Plug" }
+	def devVer() { return "3.5.0" }
 //	===========================================================
 
-definition (
-	name: appLabel(), 
-	namespace: appNamespace(), 
-	author: "Dave Gutheinz, Anthony Ramirez", 
-	description: "TP-Link/Kasa Service Manager for both cloud and hub connected devices.", 
-	category: "Convenience", 
-	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png",
-	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png",
-	iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png",
-	singleInstance: true
-)
-
-preferences {
-	page(name: "startPage")
-	page(name: "welcomePage")
-	page(name: "hubEnterIpPage")
-	page(name: "kasaAuthenticationPage")
-	page(name: "kasaAddDevicesPage")
-	page(name: "hubAddDevicesPage")
-	page(name: "removeDevicesPage")
-	page(name: "uninstallPage")
-	page(name: "devicePreferencesPage")
-}
-
-def setInitialStates() {
-	if (!state.TpLinkToken) { state.TpLinkToken = null }
-	if (!state.devices) {state.devices = [:]}
-	if (!state.currentError) {state.currentError = null}
-	if (!state.errorCount) {state.errorCount = 0}
-	settingRemove("userSelectedDevicesRemove")
-	settingRemove("userSelectedDevicesAdd")
-	settingRemove("userSelectedDevicesToUpdate")
-	if ("${userName}" =~ null) {settingRemove("userName")}
-	if ("${userPassword}" =~ null) {settingRemove("userPassword")}
-}
-
-def startPage() {
-	setInitialStates()
-    if (installType) {
-		if (installType == "Kasa Account" && userName == null && password == null) {
-			return kasaAuthenticationPage()       	
-		} else if (installType == "Node Applet" && bridgeIp == null) {
-			return hubEnterIpPage()
-		} else {
-        	return welcomePage()
-        }
-    }
-    def page1Text = ""
-	def page2Text = ""
-    def page3Text = ""
-    def page4Text = ""
-    def page5Text = ""
-    def page6Text = ""
-	page1Text = "Before the installation, the installation type must be entered.  There are two options:"
-    page2Text += "Kasa Account:  This is the cloud based entry.  It requires that the user provide "
-    page2Text += "enter their Kasa Account login and password to install the devices."
-    page3Text += "Node Applet:  This installation requires several items. (1) An always on server (PC, Android, "
-    page3Text += "or other device).  (2) The provided node.js applet up and running on the Server.  (3) Static "
-    page3Text += "IP addresses for the server (bridge/hub).  It does not require login credentials."
-    page4Text += "After selecting the mode, you will be sent a page to enter your Kasa Login Information "
-    page4Text += "or enter the IP address of your Hub."
-    page5Text += "Once you enter the connection information, the program will direct you to add devices. "
-    page5Text += "The application will poll for your devices, allow you to select found devices, and "
-    page5Text += "finally install the devices and application to SmartThings."
-    page6Text += "Once the application is already installed, you not see this page.  Instead you will be"
-    page6Text += "directed to a page where you can select add devices, remove devices, and set device preferences."
-	return dynamicPage (name: "startPage", title: "Select Installation Type", install: false, uninstall: false) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: error()
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-            paragraph page2Text
-            paragraph page3Text
-            paragraph page4Text
-            paragraph page5Text
-            paragraph page6Text
-		}
-        
-		section("") {
-			input ("installType", "enum", title: "Select Installation Type", required: true, multiple: false, 
-            	   submitOnChange: true, metadata: [values:["Kasa Account", "Node Applet"]])
- 		}
-        
-		section("${textCopyright()}")
+metadata {
+	definition (name: "TP-Link Smart ${deviceType()}",
+				namespace: "${devNamespace()}",
+				author: "Dave Gutheinz and Anthony Ramirez",
+				ocfDeviceType: "oic.d.smartplug",
+				mnmn: "SmartThings",
+				vid: "generic-switch-power-energy") {
+		capability "Switch"
+		capability "refresh"
+		capability "Health Check"
+		capability "Power Meter"
+		command "getPower"
+		capability "Energy Meter"
+		command "getEnergyStats"
+		attribute "monthTotalE", "string"
+		attribute "monthAvgE", "string"
+		attribute "weekTotalE", "string"
+		attribute "weekAvgE", "string"
+		attribute "devVer", "string"
+		attribute "devTyp", "string"
 	}
-}
-
-//	----- Main first (landing) Pages -----
-def kasaAuthenticationPage() {
-	def page1Text = ""
-	def page2Text = ""
-	def page3Text = ""
-	page1Text += "If possible, open the IDE and select Live Logging. Then, "
-	page1Text += "enter your Username and Password for the Kasa Application."
-	page2Text += "After entering all credentials, select 'Install Devices to Continue'.  "
-	page2Text += "This will call the Add Devices page."
-	page3Text += "You must select and add a device to install the application!"
-	return dynamicPage (name: "kasaAuthenticationPage", 
-    		title: "Initial Kasa Login Page", 
-            nextPage: "kasaAddDevicesPage", 
-            install: false, 
-            uninstall: false) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: error()
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-            paragraph page2Text
-            paragraph page3Text
-		}
-            
-		section("Enter Kasa Account Credentials: ") {
-			input ("userName", "email", title: "TP-Link Kasa Email Address", required: true, submitOnChange: false)
-			input ("userPassword", "password", title: "Kasa Account Password", required: true, submitOnChange: true)
-		}
-        
-		section("") {
-			if (state.currentError != null) {
-				paragraph "Error! Exit program and try again after resolving problem. ${state.currentError}!", image: error()
-			} else if (userName != null && userPassword != null) {
- 				href "kasaAddDevicesPage", title: "Install Devices to Continue!", description: "Go to Install Devices"
+	tiles(scale: 2) {
+		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true){
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label:'${name}', action:"switch.off", icon:"st.Appliances.appliances17", backgroundColor:"#00a0dc",
+				nextState:"waiting"
+				attributeState "off", label:'${name}', action:"switch.on", icon:"st.Appliances.appliances17", backgroundColor:"#ffffff",
+				nextState:"waiting"
+				attributeState "waiting", label:'${name}', action:"switch.on", icon:"st.Appliances.appliances17f", backgroundColor:"#15EE10",
+				nextState:"waiting"
+				attributeState "commsError", label:'Comms Error', action:"switch.on", icon:"st.Appliances.appliances17", backgroundColor:"#e86d13",
+				nextState:"waiting"
+			}
+ 			tileAttribute ("deviceError", key: "SECONDARY_CONTROL") {
+				attributeState "deviceError", label: '${currentValue}'
 			}
 		}
-        
-		section("${textCopyright()}")
+		
+		standardTile("refresh", "capability.refresh", width: 2, height: 1, decoration: "flat") {
+			state "default", label:"Refresh", action:"refresh.refresh"
+		}
+		
+		valueTile("currentPower", "device.power", decoration: "flat", height: 1, width: 2) {
+			state "power", label: 'Current Power \n\r ${currentValue} W'
+		}
+
+		valueTile("energyToday", "device.energy", decoration: "flat", height: 1, width: 2) {
+			state "energy", label: 'Usage Today\n\r${currentValue} WattHr'
+		}
+
+		valueTile("monthTotal", "device.monthTotalE", decoration: "flat", height: 1, width: 2) {
+			state "monthTotalE", label: '30 Day Total\n\r ${currentValue} KWH'
+		}
+
+		valueTile("monthAverage", "device.monthAvgE", decoration: "flat", height: 1, width: 2) {
+			state "monthAvgE", label: '30 Day Avg\n\r ${currentValue} KWH'
+		}
+ 
+		valueTile("weekTotal", "device.weekTotalE", decoration: "flat", height: 1, width: 2) {
+			state "weekTotalE", label: '7 Day Total\n\r ${currentValue} KWH'
+		}
+
+		valueTile("weekAverage", "device.weekAvgE", decoration: "flat", height: 1, width: 2) {
+			state "weekAvgE", label: '7 Day Avg\n\r ${currentValue} KWH'
+		}
+
+		valueTile("4x1Blank", "default", decoration: "flat", height: 1, width: 4) {
+			state "default", label: ''
+		}
+
+		main("switch")
+		details("switch", "refresh" ,"4x1Blank",
+				"currentPower", "weekTotal", "monthTotal",
+				"energyToday", "weekAverage", "monthAverage")
+	}
+
+    def refreshRate = [:]
+    refreshRate << ["1" : "Refresh every minute"]
+    refreshRate << ["5" : "Refresh every 5 minutes"]
+	refreshRate << ["10" : "Refresh every 10 minutes"]
+    refreshRate << ["15" : "Refresh every 15 minutes"]
+
+	preferences {
+		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate, image: getDevImg("refresh.png"))
+		input ("install_Type", "enum", title: "Installation Type", options: ["Node Applet", "Kasa Account"])
+		input ("device_IP", "text", title: "Device IP (Hub Only, NNN.NNN.N.NNN)")
+		input ("gateway_IP", "text", title: "Gateway IP (Hub Only, NNN.NNN.N.NNN)")
 	}
 }
 
-def hubEnterIpPage() {
-	def page1Text = "If possible, open the IDE and select Live Logging. Then, " +
-		"enter the static IP address for your gateway that runs the Node.js applet.  Assure "+
-		"that the node.js applet is running and logging to the display."
-    
-	return dynamicPage (name: "hubEnterIpPage", title: "Set Gateway IP", nextPage: "",install: false, uninstall: false) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: error()
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
-            
-		section("") {
-			input ("bridgeIp", 
-				"text", 
-                title: "Enter the Gateway IP", 
-                required: true, 
-                multiple: false, 
-                submitOnChange: true,
-                image: network()
-            )
-            if (bridgeIp) {
-				href "hubAddDevicesPage", title: "Install Devices to Continue!", description: "Go to Install Devices"
-			}
-		}
-        
-		section("${textCopyright()}")
-	}
-}
-
-def welcomePage() {
-	def page1Text = ""
-	def page2Text = ""
-	def page3Text = ""
-	def page4Text = ""
-	def page5Text = ""
-	page1Text += "Welcome to the new SmartThings application for TP-Link Kasa Devices. "
-	page1Text += "Options for this page:"
-    page2Text += "Install Devices:  Detects devices on your network that are not installed "
-    page2Text += "and then installs them.  For Cloud-based installation, the devices must "
-    page2Text += "be in remote control mode via the Kasa Application"
-    page3Text += "Remove Devices:  Allow selection of installed devices for removal from SmartThings."
-    page4Text += "Set Device Preferences.  Allows selection of installed devices and setting "
-    page4Text += "the refresh rate (all devices) and the light transition time (bulbs).  "
-    page4Text += "If not set here, the refresh rate is 30 minutes and the transition time is 1 second."
-    page5Text += "Maintenance Functions.  Provides for options to (1) Update the Kasa Token "
-    page5Text += "(cloud mode), (2) change the Hub IP address (hub version), or (3) uninstall "
-    page5Text += "all devices and the application"
-	return dynamicPage (name: "welcomePage", title: "Program Options", install: false, uninstall: false) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: error()
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-            paragraph page2Text
-            paragraph page3Text
-            paragraph page4Text
-            paragraph page5Text
-		}
-            
-		section("Device Functions") {
-        	if (installType == "Kasa Account") {
-				href "kasaAddDevicesPage", title: "Install Kasa Devices", description: "Go to Install Devices"
-            } else {
-				href "hubAddDevicesPage", title: "Install Hub Devices", description: "Go to Install Devices"
-            }
-			href "removeDevicesPage", title: "Remove Devices", description: "Go to Remove Devices"
-			href "devicePreferencesPage", title: "Set Device Preferences", description: "Go to Set Device Preferences"
-		}
-        
-		section("Maintenance Actions") {
-            if (installType == "Kasa Account") {
-				href "kasaAuthenticationPage", title: "Kasa Login and Token Update", description: "Go to Kasa Login Update"
-            }	else {
-				href "hubEnterIpPage", title: "Update Gateway IP", description: "Update Gateway IP"
-			}
-			href "uninstallPage", title: "Uninstall Page", description: "Uninstall All"
-		}
-        
-		section("${textCopyright()}")
-	}
-}
-
-//	----- Device Control Pages -----
-def kasaAddDevicesPage() {
-	getToken()
-	kasaGetDevices()
-	def devices = state.devices
-	def errorMsgDev
-	def newDevices = [:]
-	devices.each {
-		def isChild = getChildDevice(it.value.deviceMac)
-		if (!isChild) {
-			newDevices["${it.value.deviceMac}"] = "${it.value.alias} model ${it.value.deviceModel}"
-		}
-	}
-	if (devices == [:]) {
-		errorMsgDev = "We were unable to find any TP-Link Kasa devices on your account. This usually means "+
-		"that all devices are in 'Local Control Only'. Correct them then " + "rerun the application."
-	}
-	if (newDevices == [:]) {
-		errorMsgDev = "No new devices to add. Are you sure they are in Remote " + "Control Mode?"
-	}
-	def page1Text = "Devices that have not been previously installed and are not in 'Local " +
-		"WiFi control only' will appear below. Tap below to see the list of " +
-		"TP-Link Kasa Devices available select the ones you want to connect to " +
-		"SmartThings.\n" + "Press Done when you have selected the devices you " +
-		"wish to add, then press Save to add the devices to your SmartThings account."
-	return dynamicPage (name: "kasaAddDevicesPage", title: "Kasa Device Installer Page", install: true, uninstall: false) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: error()
-            } else if (errorMsgDev != null) {
-				paragraph "ERROR:  ${errorMSgDev}", image: error()
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
-            
- 		section("") {
-			input ("userSelectedDevicesAdd", 
-            	   "enum", 
-                   required: true, 
-                   multiple: true, 
-                   submitOnChange: true,
-                   title: "Select Devices to Add (${newDevices.size() ?: 0} found)", 
-                   metadata: [values:newDevices])
-		}
-        
-		section("${textCopyright()}")
-	}
-}
-
-def hubAddDevicesPage() {
-	hubGetDevices()
-	def devices = state.devices
-	def errorMsgDev
-	def newDevices = [:]
-	devices.each {
-		def isChild = getChildDevice(it.value.deviceMac)
-		if (!isChild) {
-			newDevices["${it.value.deviceMac}"] = "${it.value.alias} model ${it.value.deviceModel}"
-		}
-	}
-	if (devices == [:]) {
-		errorMsgDev = "Looking for devices.  If this message persists, we have been unable to find " +
-        "TP-Link devices on your wifi.  Check: 1) SmartThings logs, 2) node.js logfile for "
-	} else if (newDevices == [:]) {
-		errorMsgDev = "No new devices to add. Check: 1) Device installed to Kasa properly, " +
-        "2) The SmartThings MyDevices (in case already installed)."
-	}
-    def page1Text = ""
-    def page2Text = ""
-    def page3Text = ""
-    def page4Text = ""
-    def page5Text = ""
-    def page6Text = ""
-	page1Text = "This page installs the devices through the running node applet. "
-    page1Text += "On initial installation, an error will be displayed until the "
-    page1Text += "node applet returns the device data."
-    page2Text = "1.  Assure that the node applet is running."
-    page3Text = "2.  Wait for a device count equal to your devices to appear in "
-    page3Text += "'Selet Devices to Add' string."
-    page4Text = "3.  Select the devices you want to install."
-    page5Text = "4.  Select 'DONE' in upper right corner to install the devices and "
-    page5Text += "install the Application."
-    page6Text = "5.  To cancel, select '<' in the upper left corner."
-	return dynamicPage(name:"hubAddDevicesPage",
-		title:"Node Applet: Add TP-Link Devices",
-		nextPage:"",
-		refreshInterval: 10,
-        multiple: true,
-		install:true,
-		uninstall:false) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: error()
-            } else if (errorMsgDev != null) {
-				paragraph "ERROR:  ${errorMSgDev}", image: error()
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-            paragraph page2Text
-            paragraph page3Text
-            paragraph page4Text
-            paragraph page5Text
-            paragraph page6Text
-		}
-        
- 		section("") {
-			input ("userSelectedDevicesAdd", 
-            	   "enum", 
-                   required: true, 
-                   multiple: true, 
-		  		   refreshInterval: 10,
-                   submitOnChange: true,
-                   title: "Select Devices to Add (${newDevices.size() ?: 0} found)", 
-                   metadata: [values:newDevices])
-		}
-    
-		section("${textCopyright()}")
-	}
-}
-
-def removeDevicesPage() {
-	def devices = state.devices
-	def errorMsgDev
-	def oldDevices = [:]
-	devices.each {
-		def isChild = getChildDevice(it.value.deviceMac)
-		if (isChild) {
-			oldDevices["${it.value.deviceMac}"] = "${it.value.alias} model ${it.value.deviceModel}"
-		}
-	}
-	if (devices == [:]) {
-		errorMsgDev = "Devices database was cleared in-error.  Run Device Installer Page to correct " +
-        "then try again.  You can also remove devices using the SmartThings IDE or either version " +
-        "of the phone app."
-	}
-	if (oldDevices == [:]) {
-		errorMsgDev = "There are no devices to remove from the SmartThings app at this time.  This " +
-        "implies no devices are installed."
-	}
-	def page1Text = "Devices that have been installed " +
-		"will appear below. Tap below to see the list of " +
-		"TP-Link Kasa Devices available select the ones you want to connect to " +
-		"SmartThings.\n" + "Press Done when you have selected the devices you " +
-		"wish to remove, then Press Save to remove the devices to your SmartThings account."
-	return dynamicPage (name: "removeDevicesPage", title: "Device Uninstaller Page", install: true, uninstall: false) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: error()
-            } else if (errorMsgDev != null) {
-				paragraph "ERROR:  ${errorMSgDev}", image: error()
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
-        
-        
-		section("") {
-			input ("userSelectedDevicesRemove", "enum", required: true, multiple: true, 
-            	submitOnChange: false, title: "Select Devices to Remove (${oldDevices.size() ?: 0} found)", 
-                metadata: [values:oldDevices])
-		}
-        
-		section("${textCopyright()}")
-	}
-}
-
-def devicePreferencesPage() {
-	def devices = state.devices
-	def oldDevices = [:]
-	devices.each {
-		def isChild = getChildDevice(it.value.deviceMac)
-		if (isChild) {
-			oldDevices["${it.value.deviceMac}"] = "${it.value.alias} model ${it.value.deviceModel}"
-		}
-	}
-
-	def page1Text = ""
-    def page2Text = ""
-    def page3Text = ""
-    page1Text += "Transition Time.  The light transition time that allows the light to fade on and off. "
-    page1Text += "Applies to bulbs only.  If filled-in, is ignored for plugs and switches."
-    page2Text += "Refresh Rate.  Allows selecting a refresh rate other than the default of every 30 minutes."
-    page3Text += "Saving or Exiting.  This page is saved by selecting the 'SAVE' in the upper righht hand "
-    page3Text += "top of the page.  To exit w/o saving, use the '<' in the upper left hand corner."
-    
-	return dynamicPage (name: "devicePreferencesPage", title: "Device Preferences Page", install: true, uninstall: false) {
-		section("") {
-			paragraph "${appLabel()}", image: appLabel()
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: getAppImg("error.png")
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Information and Instructions: ", hideable: true, hidden: true) {
-            paragraph page1Text
-            paragraph page2Text
-            paragraph page3Text
-		}
-        
-		section("Device Configuration: ") {
-			input ("userSelectedDevicesToUpdate", "enum", required: true, multiple: true, 
-	            submitOnChange: false, title: "Select Devices to Update (${oldDevices.size() ?: 0} found)", 
-	            metadata: [values: oldDevices])
-			input ("userLightTransTime", "enum", required: true, multiple: false, 
-	            submitOnChange: false, title: "Lighting Transition Time", 
-            metadata: [values:["500" : "0.5 second", "1000" : "1 second", "1500" : "1.5 second", "2000" : "2 seconds", "2500" : "2.5 seconds", "5000" : "5 seconds", "10000" : "10 seconds", "20000" : "20 seconds", "40000" : "40 seconds", "60000" : "60 seconds"]])
-				input ("userRefreshRate", "enum", required: true, multiple: false, 
- 	           submitOnChange: false, title: "Device Refresh Rate", metadata: [values:["1" : "Refresh every minute", "5" : "Refresh every 5 minutes", "10" : "Refresh every 10 minutes", "15" : "Refresh every 15 minutes", "30" : "Refresh every 30 minutes"]])
-            paragraph "Save options: select 'NEXT' (upper right).  Return: select '<' (upper left)."
-		}
-
-		section("${textCopyright()}")
-	}
-}
-
-//	----- Maintenance Pages -----
-def uninstallPage() {
-log.error "at uninstallPage"
-	def page1Text = "This will uninstall the All Child Devices including this Application with all it's user data. \nPlease make sure that any devices created by this app are removed from any routines/rules/smartapps before tapping Remove."
-	dynamicPage (name: "uninstallPage", title: "Uninstall Page", install: false, uninstall: true) {
-		section("") {
-			paragraph appLabel(), image: appLogo()
-		}
-        
-		section("Instructions", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
-            
-		section("${textCopyright()}")
-        
-		remove("Uninstall this application", "Warning!!!", "Last Chance to Stop! \nThis action is not reversible \n\nThis will remove All Devices including this Application with all it's user data")
-	}
-}
-
-def getToken() {
-	def hub = location.hubs[0]
-	def cmdBody = [
-		method: "login",
-		params: [
-			appType: "Kasa_Android",
-			cloudUserName: "${userName}",
-			cloudPassword: "${userPassword}",
-			terminalUUID: "${hub.id}"
-		]
-	]
-	def getTokenParams = [
-		uri: "https://wap.tplinkcloud.com",
-		requestContentType: 'application/json',
-		contentType: 'application/json',
-		headers: ['Accept':'application/json; version=1, */*; q=0.01'],
-		body : new groovy.json.JsonBuilder(cmdBody).toString()
-	]
-	httpPostJson(getTokenParams) {resp ->
-		if (resp.status == 200 && resp.data.error_code == 0) {
-			state.TpLinkToken = resp.data.result.token
-			log.info "TpLinkToken updated to ${state.TpLinkToken}"
-			sendEvent(name: "TokenUpdate", value: "tokenUpdate Successful.")
-			if (state.currentError != null) {
-				state.currentError = null
-			}
-		} else if (resp.status != 200) {
-			state.currentError = resp.statusLine
-			sendEvent(name: "currentError", value: resp.data)
-			log.error "Error in getToken: ${state.currentError}"
-			sendEvent(name: "TokenUpdate", value: state.currentError)
-		} else if (resp.data.error_code != 0) {
-			state.currentError = resp.data
-			sendEvent(name: "currentError", value: resp.data)
-			log.error "Error in getToken: ${state.currentError}"
-			sendEvent(name: "TokenUpdate", value: state.currentError)
-		}
-	}
-}
-
-//	----- Get Device Data -----
-def kasaGetDevices() {
-	def currentDevices = ""
-	def cmdBody = [method: "getDeviceList"]
-	def getDevicesParams = [
-		uri: "https://wap.tplinkcloud.com?token=${state.TpLinkToken}",
-		requestContentType: 'application/json',
-		contentType: 'application/json',
-		headers: ['Accept':'application/json; version=1, */*; q=0.01'],
-		body : new groovy.json.JsonBuilder(cmdBody).toString()
-	]
-	httpPostJson(getDevicesParams) {resp ->
-		if (resp.status == 200 && resp.data.error_code == 0) {
-			currentDevices = resp.data.result.deviceList
-			if (state.currentError != null) {
-				state.currentError = null
-			}
-		} else if (resp.status != 200) {
-			state.currentError = resp.statusLine
-			sendEvent(name: "currentError", value: resp.data)
-			log.error "Error in getDeviceData: ${state.currentError}"
-            return
-		} else if (resp.data.error_code != 0) {
-			state.currentError = resp.data
-			sendEvent(name: "currentError", value: resp.data)
-			log.error "Error in getDeviceData: ${state.currentError}"
-            return
-		}
-	}
-	state.devices = [:]
-	def devices = state.devices
-	currentDevices.each {
-		def device = [:]
-		device["deviceMac"] = it.deviceMac
-		device["alias"] = it.alias
-		device["deviceModel"] = it.deviceModel
-		device["deviceId"] = it.deviceId
-		device["appServerUrl"] = it.appServerUrl
-		devices << ["${it.deviceMac}" : device]
-		def isChild = getChildDevice(it.deviceMac)
-		if (isChild) {
-			isChild.setAppServerUrl(it.appServerUrl)
-            isChild.setDeviceId(it.deviceId)
-		}
-		log.info "Device ${it.alias} added to devices array"
-	}
-}
-
-def hubGetDevices() {
-	runIn(10, createBridgeError)
-	def headers = [:]
-	headers.put("HOST", "${bridgeIp}:8082")	//	Same as on Hub.
-	headers.put("command", "pollForDevices")
-	sendHubCommand(new physicalgraph.device.HubAction([headers: headers], null, [callback: hubExtractDeviceData]))
-}
-
-def hubExtractDeviceData(response) {
-	def currentDevices =  parseJson(response.headers["cmd-response"])
-    if (currentDevices == []) {
-    	return
-    }
-	state.devices = [:]
-	def devices = state.devices
-	currentDevices.each {
-		def device = [:]
-		device["deviceMac"] = it.deviceMac
-		device["alias"] = it.alias
-		device["deviceModel"] = it.deviceModel
-        device["deviceIP"] = it.deviceIP
-        device["gatewayIP"] = it.gatewayIP
-		devices << ["${it.deviceMac}" : device]
-		def isChild = getChildDevice(it.deviceMac)
-		if (isChild) {
-            isChild.setDeviceIP(it.deviceIP)
-            isChild.setGatewayIP(it.gatewayIP)
-		}
-		log.info "Device ${it.alias} added to devices array"
-	}
-    log.info "Node Applet Bridge Status: OK"
-    unschedule(createBridgeError)
-	state.currentError = null
-	sendEvent(name: "currentError", value: null)
-}
-
-def createBridgeError() {
-    log.info "Node Applet Bridge Status: Not Accessible"
-	state.currentError = "Node Applet not acessible"
-	sendEvent(name: "currentError", value: "Node Applet Not Accessible")
-}
-
-//	----- ACTION PAGES. Add, Delete, Update Devices.  Remove App -----
-def addDevices() {
-	def tpLinkModel = [:]
-	//	Plug-Switch Devices (no energy monitor capability)
-	tpLinkModel << ["HS100" : "TP-Link Smart Plug"]						//	HS100
-	tpLinkModel << ["HS103" : "TP-Link Smart Plug"]						//	HS103
-	tpLinkModel << ["HS105" : "TP-Link Smart Plug"]						//	HS105
-	tpLinkModel << ["HS200" : "TP-Link Smart Switch"]					//	HS200
-	tpLinkModel << ["HS210" : "TP-Link Smart Switch"]					//	HS210
-	tpLinkModel << ["KP100" : "TP-Link Smart Plug"]						//	KP100
-	//	Dimming Switch Devices
-	tpLinkModel << ["HS220" : "TP-Link Smart Dimming Switch"]			//	HS220
-	//	Energy Monitor Plugs
-	tpLinkModel << ["HS110" : "TP-Link Smart Energy Monitor Plug"]		//	HS110
-	tpLinkModel << ["HS115" : "TP-Link Smart Energy Monitor Plug"]		//	HS110
-	//	Soft White Bulbs
-	tpLinkModel << ["KB100" : "TP-Link Smart Soft White Bulb"]			//	KB100
-	tpLinkModel << ["LB100" : "TP-Link Smart Soft White Bulb"]			//	LB100
-	tpLinkModel << ["LB110" : "TP-Link Smart Soft White Bulb"]			//	LB110
-	tpLinkModel << ["KL110" : "TP-Link Smart Soft White Bulb"]			//	KL110
-	tpLinkModel << ["LB200" : "TP-Link Smart Soft White Bulb"]			//	LB200
-	//	Tunable White Bulbs
-	tpLinkModel << ["LB120" : "TP-Link Smart Tunable White Bulb"]		//	LB120
-	tpLinkModel << ["KL120" : "TP-Link Smart Tunable White Bulb"]		//	KL120
-	//	Color Bulbs
-	tpLinkModel << ["KB130" : "TP-Link Smart Color Bulb"]				//	KB130
-	tpLinkModel << ["LB130" : "TP-Link Smart Color Bulb"]				//	LB130
-	tpLinkModel << ["KL130" : "TP-Link Smart Color Bulb"]				//	KL130
-	tpLinkModel << ["LB230" : "TP-Link Smart Color Bulb"]				//	LB230
-
-	def hub = location.hubs[0]
-	def hubId = hub.id
-	userSelectedDevicesAdd.each { dni ->
-		try {
-			def isChild = getChildDevice(dni)
-			if (!isChild) {
-				def device = state.devices.find { it.value.deviceMac == dni }
-				def deviceModel = device.value.deviceModel.substring(0,5)
-				addChildDevice(
-                	"${appNamespace()}", 
-                	tpLinkModel["${deviceModel}"],
-                    device.value.deviceMac,hubId, [
-                    	"label" : device.value.alias,
-                    	"name" : deviceModel,
-                    	"data" : [
-                        	"deviceId" : device.value.deviceId, 
-                            "appServerUrl" : device.value.appServerUrl,
-                            "installType" : installType,
-                            "deviceIP" : device.value.deviceIP,
-                            "gatewayIP" : device.value.gatewayIP
-                        ]
-                    ]
-                )
-				log.info "Installed TP-Link $deviceModel with alias ${device.value.alias}"
-                
-				if (userSelectedNotification) {
-					sendPush("Successfully installed TP-Link $deviceModel with alias ${device.value.alias}")
-				}
-			}
-		} catch (e) {
-			log.debug "Error Adding ${deviceModel}: ${e}"
-		}
-	}
-}
-
-def removeDevices() {
-	userSelectedDevicesRemove.each { dni ->
-		try{
-			def isChild = getChildDevice(dni)
-			if (isChild) {
-				def delete = isChild
-				delete.each { deleteChildDevice(it.deviceNetworkId, true) }
-			}
-			if (userSelectedNotification) {
-				sendPush("Successfully uninstalled TP-Link $deviceModel with alias ${device.value.alias}")
-			}
-		} catch (e) {
-			log.debug "Error deleting ${it.deviceNetworkId}: ${e}"
-		}
-	}
-}
-
-def updatePreferences() {
-	userSelectedDevicesToUpdate.each {
-		def child = getChildDevice(it)
-		child.setLightTransTime(userLightTransTime)
-		child.setRefreshRate(userRefreshRate)
-		log.info "Kasa device ${child} preferences updated"
-		if (userSelectedNotification) {
-			sendPush("Successfully updated TP-Link $deviceModel with alias ${device.value.alias}")
-		}
-	}
-}
-
-//	----- SEND DEVICE COMMAND TO CLOUD FOR DH -----
-def sendDeviceCmd(appServerUrl, deviceId, command) {
-	def cmdResponse = ""
-	def cmdBody = [
-		method: "passthrough",
-		params: [
-			deviceId: deviceId,
-			requestData: "${command}"
-		]
-	]
-	def sendCmdParams = [
-		uri: "${appServerUrl}/?token=${state.TpLinkToken}",
-		requestContentType: 'application/json',
-		contentType: 'application/json',
-		headers: ['Accept':'application/json; version=1, */*; q=0.01'],
-		body : new groovy.json.JsonBuilder(cmdBody).toString()
-	]
-	httpPostJson(sendCmdParams) {resp ->
-		if (resp.status == 200 && resp.data.error_code == 0) {
-			def jsonSlurper = new groovy.json.JsonSlurper()
-			cmdResponse = jsonSlurper.parseText(resp.data.result.responseData)
-			if (state.errorCount != 0) {
-				state.errorCount = 0
-			}
-			if (state.currentError != null) {
-				state.currentError = null
-				sendEvent(name: "currentError", value: null)
-				log.debug "state.errorCount = ${state.errorCount}	//	state.currentError = ${state.currentError}"
-			}
-		//log.debug "state.errorCount = ${state.errorCount}		//	state.currentError = ${state.currentError}"
-		} else if (resp.status != 200) {
-			state.currentError = resp.statusLine
-			cmdResponse = "ERROR: ${resp.statusLine}"
-			sendEvent(name: "currentError", value: resp.data)
-			log.error "Error in sendDeviceCmd: ${state.currentError}"
-		} else if (resp.data.error_code != 0) {
-			state.currentError = resp.data
-			cmdResponse = "ERROR: ${resp.data.msg}"
-			sendEvent(name: "currentError", value: resp.data)
-			log.error "Error in sendDeviceCmd: ${state.currentError}"
-		}
-	}
-	return cmdResponse
-}
-
-//	----- INSTALL, UPDATE, INITIALIZE, UNINSTALLED -----
+//	===== Update when installed or setting changed =====
 def installed() {
-	initialize()
+	log.info "Installing ${device.label}..."
+    setRefreshRate(10)
+	if (getDataValue("installType") == null) { setInstallType("Node Applet") }
+}
+
+def ping() {
+	refresh()
+}
+
+def update() {
+    runIn(2, updated)
 }
 
 def updated() {
-	initialize()
-}
-
-def initialize() {
-	unsubscribe()
+	log.info "Updating ${device.label}..."
+	state.emon = metadata.definition.energyMonitor
+	state.emeterText = "emeter"
+	state.getTimeText = "time"
 	unschedule()
-	if (installType == "Kasa Account"){
-		schedule("0 30 2 ? * WED", getToken)
-		runEvery5Minutes(checkError)
-    }
-    if (installType == "Node Applet") { runEvery5Minutes(hubGetDevices) }
-	if (userSelectedDevicesAdd) { addDevices() }
-	if (userSelectedDevicesRemove) { removeDevices() }
-	if (userSelectedDevicesToUpdate) { updatePreferences() }
+    if (getDataValue("installType") == null) { setInstallType("Node Applet") }
+	if (refreshRate) { setRefreshRate(refreshRate) }
+    if (device_IP) { setDeviceIP(device_IP) }
+    if (gateway_IP) { setGatewayIP(gateway_IP) }
+    if (install_Type) { setInstallType(install_Type) }
+	sendEvent(name: "DeviceWatch-Enroll", value: groovy.json.JsonOutput.toJson(["protocol":"cloud", "scheme":"untracked"]), displayed: false)
+	sendEvent(name: "devVer", value: devVer(), displayed: false)
+	sendEvent(name: "devTyp", value: deviceType(), displayed: false)
+    
+	schedule("0 05 0 * * ?", setCurrentDate)
+	schedule("0 10 0 * * ?", getEnergyStats)
+	setCurrentDate()
+	runIn(2, refresh)
+	runIn(7, getEnergyStats)
 }
 
-def uninstalled() {
+void uninstalled() {
+	try {
+		def alias = device.label
+		log.debug "Removing device ${alias} with DNI = ${device.deviceNetworkId}"
+		parent.removeChildDevice(alias, device.deviceNetworkId)
+	} catch (ex) {
+		log.debug "${device.name} ${device.label}: Either the device was manually installed or there was an error"
+        log.debug "Command Exception: ", ex
+	}
 }
 
-//	----- PERIODIC CLOUD and HUB TASKS -----
-def checkError() {
-	if (state.currentError == null || state.currentError == "none") {
-		log.info "${appLabel()} did not find any errors."
-		if (state.currentError == "none") {
-			state.currentError = null
+//	===== Basic Plug Control/Status =====
+def on() {
+	sendCmdtoServer('{"system":{"set_relay_state":{"state": 1}}}', "deviceCommand", "commandResponse")
+	runIn(2, refresh)
+}
+
+def off() {
+	sendCmdtoServer('{"system":{"set_relay_state":{"state": 0}}}', "deviceCommand", "commandResponse")
+	runIn(2, refresh)
+}
+
+def getSystemInfo() {
+	sendCmdtoServer('{"system":{"get_sysinfo":{}}}', "deviceCommand", "refreshResponse")
+    runIn(2, getPower)
+}
+
+def refresh(){
+	sendCmdtoServer('{"system":{"get_sysinfo":{}}}', "deviceCommand", "refreshResponse")
+	runIn(2, getPower)
+    runIn(7, getConsumption)
+}
+
+def refreshResponse(cmdResponse){
+	def status = cmdResponse.system.get_sysinfo.relay_state
+	if (status == 1) {
+		status = "on"
+	} else {
+		status = "off"
+	}
+	log.info "${device.name} ${device.label}: Power: ${status}"
+	sendEvent(name: "switch", value: status)
+}
+
+//	===== Get Current Energy Data =====
+def getPower(){
+	sendCmdtoServer("""{"${state.emeterText}":{"get_realtime":{}}}""", "deviceCommand", "energyMeterResponse")
+}
+
+def energyMeterResponse(cmdResponse) {
+	def realtime = cmdResponse["emeter"]["get_realtime"]
+	if (realtime.power == null) {
+		state.powerScale = "power_mw"
+		state.energyScale = "energy_wh"
+	} else {
+		state.powerScale = "power"
+		state.energyScale = "energy"
+	}
+	def powerConsumption = realtime."${state.powerScale}"
+		if (state.powerScale == "power_mw") {
+			powerConsumption = Math.round(powerConsumption/10) / 100
+		} else {
+		powerConsumption = Math.round(100*powerConsumption) / 100
 		}
+	sendEvent(name: "power", value: powerConsumption)
+	log.info "$device.name $device.label: Updated CurrentPower to $powerConsumption"
+}
+
+//	===== Get Today's Consumption =====
+def getConsumption(){
+	sendCmdtoServer("""{"${state.emeterText}":{"get_daystat":{"month": ${state.monthToday}, "year": ${state.yearToday}}}}""", "emeterCmd", "useTodayResponse")
+}
+
+def useTodayResponse(cmdResponse) {
+	def wattHrToday
+	def wattHrData
+	def dayList = cmdResponse["emeter"]["get_daystat"].day_list
+	for (int i = 0; i < dayList.size(); i++) {
+		wattHrData = dayList[i]
+		if(wattHrData.day == state.dayToday) {
+			wattHrToday = wattHrData."${state.energyScale}"
+ 		}
+	}
+	if (state.powerScale == "power") {
+		wattHrToday = Math.round(1000*wattHrToday)
+	}
+	sendEvent(name: "energy", value: wattHrToday)
+	log.info "$device.name $device.label: Updated Usage Today to ${wattHrToday}"
+}
+
+//	===== Get Weekly and Monthly Stats =====
+def getEnergyStats() {
+	state.monTotEnergy = 0
+	state.monTotDays = 0
+	state.wkTotEnergy = 0
+	state.wkTotDays = 0
+	sendCmdtoServer("""{"${state.emeterText}":{"get_daystat":{"month": ${state.monthToday}, "year": ${state.yearToday}}}}""", "emeterCmd", "engrStatsResponse")
+	runIn(4, getPrevMonth)
+}
+
+def getPrevMonth() {
+	def prevMonth = state.monthStart
+	if (state.monthToday == state.monthStart) {
+		//	If all of the data is in this month, do not request previous month.
+		//	This will occur when the current month is 31 days.
+		return
+	} else if (state.monthToday - 2 == state.monthStart) {
+		//	If the start month is 2 less than current, we must handle
+		//	the data to get a third month - January.
+		state.handleFeb = "yes"
+		prevMonth = prevMonth + 1
+		runIn(4, getJan)
+	}
+	sendCmdtoServer("""{"${state.emeterText}":{"get_daystat":{"month": ${prevMonth}, "year": ${state.yearStart}}}}""", "emeterCmd", "UseJanWatts")
+}
+
+def getJan() {
+//	Gets January data on March 1 and 2.  Only access if current month = 3
+//	and start month = 1
+	sendCmdtoServer("""{"${state.emeterText}":{"get_daystat":{"month": ${state.monthStart}, "year": ${state.yearStart}}}}""", "emeterCmd", "engrStatsResponse")
+}
+
+def engrStatsResponse(cmdResponse) {
+/*	
+	This method parses up to two energy status messages from the device,
+	adding the energy for the previous 30 days and week, ignoring the
+	current day.  It then calculates the 30 and 7 day average formatted
+	in kiloWattHours to two decimal places.
+*/
+	def dayList = cmdResponse[state.emeterText]["get_daystat"].day_list
+	if (!dayList[0]) {
+		log.info "$device.name $device.label: Month has no energy data."
 		return
 	}
-	def errMsg = state.currentError.msg
-	log.info "Attempting to solve error: ${errMsg}"
-	state.errorCount = state.errorCount +1
-	if (errMsg == "Token expired" && state.errorCount < 6) {
-		sendEvent (name: "ErrHandling", value: "Handle comms error attempt ${state.errorCount}")
-		getDevices()
-		if (state.currentError == null) {
-			log.info "getDevices successful. apiServerUrl updated and token is good."
-			return
+	def monTotEnergy = state.monTotEnergy
+	def wkTotEnergy = state.wkTotEnergy
+	def monTotDays = state.monTotDays
+	def wkTotDays = state.wkTotDays
+    def startDay = state.dayStart
+	def dataMonth = dayList[0].month
+	if (dataMonth == state.monthToday) {
+		for (int i = 0; i < dayList.size(); i++) {
+			def energyData = dayList[i]
+			monTotEnergy += energyData."${state.energyScale}"
+			monTotDays += 1
+			if (state.dayToday < 8 || energyData.day >= state.weekStart) {
+				wkTotEnergy += energyData."${state.energyScale}"
+				wkTotDays += 1
+			}
+			if(energyData.day == state.dayToday) {
+				monTotEnergy -= energyData."${state.energyScale}"
+				wkTotEnergy -= energyData."${state.energyScale}"
+				monTotDays -= 1
+				wkTotDays -= 1
+			}
 		}
-		log.error "${errMsg} error while attempting getDevices. Will attempt getToken"
-		getToken()
-		if (state.currentError == null) {
-			log.info "getToken successful. Token has been updated."
-			getDevices()
-			return
+	} else if (state.handleFeb == "yes" && dataMonth == 2) {
+    	startDay = 1
+		for (int i = 0; i < dayList.size(); i++) {
+			def energyData = dayList[i]
+			if (energyData.day >= startDay) {
+				monTotEnergy += energyData."${state.energyScale}"
+				monTotDays += 1
+			}
+			if (energyData.day >= state.weekStart && state.dayToday < 8) {
+				wkTotEnergy += energyData."${state.energyScale}"
+				wkTotDays += 1
+			}
+		}
+	} else if (state.handleFeb == "yes" && dataMonth == 1) {
+		for (int i = 0; i < dayList.size(); i++) {
+			def energyData = dayList[i]
+			if (energyData.day >= startDay) {
+				monTotEnergy += energyData."${state.energyScale}"
+				monTotDays += 1
+			}
+			state.handleFeb = ""
 		}
 	} else {
-		log.error "checkError: No auto-correctable errors or exceeded Token request count."
-	}
-	log.error "checkError residual: ${state.currentError}"
-}
-
-def removeChildDevice(alias, deviceNetworkId) {
-	try {
-		deleteChildDevice(it.deviceNetworkId)
-		sendEvent(name: "DeviceDelete", value: "${alias} deleted")
-	} catch (Exception e) {
-		sendEvent(name: "DeviceDelete", value: "Failed to delete ${alias}")
-	}
-}
-
-void settingUpdate(name, value, type=null) {
-	log.trace "settingUpdate($name, $value, $type)..."
-	if(name) {
-		if(value == "" || value == null || value == []) {
-			settingRemove(name)
-			return
+		for (int i = 0; i < dayList.size(); i++) {
+			def energyData = dayList[i]
+			if (energyData.day >= startDay) {
+				monTotEnergy += energyData."${state.energyScale}"
+				monTotDays += 1
+			}
+			if (energyData.day >= state.weekStart && state.dayToday < 8) {
+				wkTotEnergy += energyData."${state.energyScale}"
+				wkTotDays += 1
+			}
 		}
 	}
-	if(name && type) {
-		app?.updateSetting("$name", [type: "$type", value: value])
+	state.monTotDays = monTotDays
+	state.monTotEnergy = monTotEnergy
+	state.wkTotEnergy = wkTotEnergy
+	state.wkTotDays = wkTotDays
+	log.info "$device.name $device.label: Update 7 and 30 day energy consumption statistics"
+    if (monTotDays == 0) {
+    	//	Aviod divide by zero on 1st of month
+    	monTotDays = 1
+        wkTotDays = 1 
 	}
-	else if (name && type == null) { app?.updateSetting(name.toString(), value) }
+	def monAvgEnergy =monTotEnergy/monTotDays
+	def wkAvgEnergy = wkTotEnergy/wkTotDays
+	if (state.powerScale == "power_mw") {
+		monAvgEnergy = Math.round(monAvgEnergy/10)/100
+		wkAvgEnergy = Math.round(wkAvgEnergy/10)/100
+		monTotEnergy = Math.round(monTotEnergy/10)/100
+		wkTotEnergy = Math.round(wkTotEnergy/10)/100
+	} else {
+		monAvgEnergy = Math.round(100*monAvgEnergy)/100
+		wkAvgEnergy = Math.round(100*wkAvgEnergy)/100
+		monTotEnergy = Math.round(100*monTotEnergy)/100
+		wkTotEnergy = Math.round(100*wkTotEnergy)/100
+	}
+	sendEvent(name: "monthTotalE", value: monTotEnergy)
+	sendEvent(name: "monthAvgE", value: monAvgEnergy)
+	sendEvent(name: "weekTotalE", value: wkTotEnergy)
+	sendEvent(name: "weekAvgE", value: wkAvgEnergy)
 }
 
-void settingRemove(name) {
-	log.trace "settingRemove($name)..."
-	if(name) { app?.deleteSetting("$name") }
+//	===== Obtain Week and Month Data =====
+def setCurrentDate() {
+	sendCmdtoServer('{"time":{"get_time":null}}', "deviceCommand", "currentDateResponse")
 }
 
-def network() {return "https://s3.amazonaws.com/smartapp-icons/Internal/network-scanner.png"}
+def currentDateResponse(cmdResponse) {
+	def currDate =  cmdResponse["time"]["get_time"]
+	state.dayToday = currDate.mday.toInteger()
+	state.monthToday = currDate.month.toInteger()
+	state.yearToday = currDate.year.toInteger()
+	def dateToday = Date.parse("yyyy-MM-dd", "${currDate.year}-${currDate.month}-${currDate.mday}")
+	def monStartDate = dateToday - 30
+	def wkStartDate = dateToday - 7
+	state.dayStart = monStartDate[Calendar.DAY_OF_MONTH].toInteger()
+	state.monthStart = monStartDate[Calendar.MONTH].toInteger() + 1
+	state.yearStart = monStartDate[Calendar.YEAR].toInteger()
+	state.weekStart = wkStartDate[Calendar.DAY_OF_MONTH].toInteger()
+}
 
-def error() {return "https://s3.amazonaws.com/smartapp-icons/SafetyAndSecurity/App-Panic.png"}
+//	----- SEND COMMAND TO CLOUD VIA SM -----
+private sendCmdtoServer(command, hubCommand, action) {
+	try {
+		if (installType() == "Cloud") {
+			sendCmdtoCloud(command, hubCommand, action)
+		} else {
+			sendCmdtoHub(command, hubCommand, action)
+		}
+	} catch (ex) {
+		log.error "Sending Command Exception:", ex
+	}
+}
 
-def appLogo() {return "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png"}
+private sendCmdtoCloud(command, hubCommand, action){
+	def appServerUrl = getDataValue("appServerUrl")
+	def deviceId = getDataValue("deviceId")
+	def cmdResponse = parent.sendDeviceCmd(appServerUrl, deviceId, command)
+	String cmdResp = cmdResponse.toString()
+	if (cmdResp.substring(0,5) == "ERROR"){
+		def errMsg = cmdResp.substring(7,cmdResp.length())
+		log.error "${device.name} ${device.label}: ${errMsg}"
+		sendEvent(name: "switch", value: "commsError", descriptionText: errMsg)
+		sendEvent(name: "deviceError", value: errMsg)
+		sendEvent(name: "DeviceWatch-DeviceStatus", value: "offline", displayed: false, isStateChange: true)
+		action = ""
+	} else {
+		sendEvent(name: "DeviceWatch-DeviceStatus", value: "online", displayed: false, isStateChange: true)
+		sendEvent(name: "deviceError", value: "OK")
+	}
+		actionDirector(action, cmdResponse)
+}
 
-def appInfoDesc() {return "• ${textVersion()}  \n\r• ${textModified()}"}
+private sendCmdtoHub(command, hubCommand, action){
+	def headers = [:] 
+	headers.put("HOST", "$gatewayIP:8082")	//	Same as on Hub.
+	headers.put("tplink-iot-ip", deviceIP)
+	headers.put("tplink-command", command)
+	headers.put("action", action)
+	headers.put("command", hubCommand)
+	sendHubCommand(new physicalgraph.device.HubAction([
+		headers: headers],
+		device.deviceNetworkId,
+		[callback: hubResponseParse]
+	))
+}
+
+def hubResponseParse(response) {
+	def action = response.headers["action"]
+	def cmdResponse = parseJson(response.headers["cmd-response"])
+	if (cmdResponse == "TcpTimeout") {
+		log.error "$device.name $device.label: Communications Error"
+		sendEvent(name: "switch", value: "offline", descriptionText: "ERROR at hubResponseParse TCP Timeout")
+		sendEvent(name: "deviceError", value: "TCP Timeout in Hub")
+		sendEvent(name: "DeviceWatch-DeviceStatus", value: "offline", displayed: false, isStateChange: true)
+	} else {
+		sendEvent(name: "deviceError", value: "OK")
+		sendEvent(name: "DeviceWatch-DeviceStatus", value: "online", displayed: false, isStateChange: true)
+		actionDirector(action, cmdResponse)
+	}
+}
+
+def actionDirector(action, cmdResponse) {
+	switch(action) {
+		case "commandResponse":
+			refresh()
+			break
+
+		case "refreshResponse":
+			refreshResponse(cmdResponse)
+			break
+
+		case "energyMeterResponse":
+			energyMeterResponse(cmdResponse)
+			break
+			
+		case "useTodayResponse":
+			useTodayResponse(cmdResponse)
+			break
+			
+		case "currentDateResponse":
+			currentDateResponse(cmdResponse)
+			break
+			
+		case "engrStatsResponse":
+			engrStatsResponse(cmdResponse)
+			break
+			
+		default:
+			log.debug "at default"
+	}
+}
+
+//	----- CHILD / PARENT INTERCHANGE TASKS -----
+def setAppServerUrl(newAppServerUrl) {
+	updateDataValue("appServerUrl", newAppServerUrl)
+	log.info "Updated appServerUrl for ${device.name} ${device.label}"
+}
+
+def setLightTransTime(lightTransTime) {
+	return
+}
+
+def setRefreshRate(refreshRate) {
+	switch(refreshRate) {
+		case "1" :
+			runEvery1Minute(refresh)
+			log.info "${device.name} ${device.label} Refresh Scheduled for every minute"
+			break
+		case "5" :
+			runEvery5Minutes(refresh)
+			log.info "${device.name} ${device.label} Refresh Scheduled for every 5 minutes"
+			break
+		case "10" :
+			runEvery10Minutes(refresh)
+			log.info "${device.name} ${device.label} Refresh Scheduled for every 10 minutes"
+			break
+		case "15" :
+			runEvery15Minutes(refresh)
+			log.info "${device.name} ${device.label} Refresh Scheduled for every 15 minutes"
+			break
+		default:
+			runEvery10Minutes(refresh)
+			log.info "${device.name} ${device.label} Refresh Scheduled for every 10 minutes"
+	}
+}
+
+def setDeviceIP(deviceIP) { 
+	updateDataValue("deviceIP", deviceIP) 
+	log.info "${device.name} ${device.label} device IP set to ${deviceIP}"
+}
+
+def setGatewayIP(gatewayIP) { 
+	updateDataValue("gatewayIP", gatewayIP) 
+	log.info "${device.name} ${device.label} gateway IP set to ${gatewayIP}"
+}
+
+def setInstallType(installType) {
+	updateDataValue("installType", installType)
+	log.info "${device.name} ${device.label} Installation Type set to ${installType}"
+}
+
+//	===== GitHub Values =====
+	def getDevImg(imgName)	{
+    	return "https://raw.githubusercontent.com/${devNamespace()}/TP-Link-SmartThing/master/images/$imgName" 
+    }
 //end-of-file

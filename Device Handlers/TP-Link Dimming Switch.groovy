@@ -91,8 +91,15 @@ metadata {
 		main("switch")
 		details("switch", "refresh")
 	}
+    
+    def refreshRate = [:]
+    refreshRate << ["1" : "Refresh every minute"]
+    refreshRate << ["5" : "Refresh every 5 minutes"]
+	refreshRate << ["10" : "Refresh every 10 minutes"]
+    refreshRate << ["15" : "Refresh every 15 minutes"]
+
 	preferences {
-		input ("refreshRate", "enum", title: "Device Refresh Rate", options: ["1" : "Refresh every minute", "5" : "Refresh every 5 minutes", "10" : "Refresh every 10 minutes", "15" : "Refresh every 15 minutes", "30" : "Refresh every 30 minutes"], image: getDevImg("refresh.png"))
+		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate, image: getDevImg("refresh.png"))
 		input ("install_Type", "enum", title: "Installation Type", options: ["Node Applet", "Kasa Account"])
 		input ("device_IP", "text", title: "Device IP (Hub Only, NNN.NNN.N.NNN)")
 		input ("gateway_IP", "text", title: "Gateway IP (Hub Only, NNN.NNN.N.NNN)")
@@ -102,12 +109,16 @@ metadata {
 //	===== Update when installed or setting changed =====
 def installed() {
 	log.info "Installing ${device.label}..."
-    setRefreshRate(30)
+    setRefreshRate(10)
 	if (getDataValue("installType") == null) { setInstallType("Node Applet") }
 }
 
 def ping() {
 	refresh()
+}
+
+def update() {
+    runIn(2, updated)
 }
 
 def updated() {
@@ -276,8 +287,8 @@ def setRefreshRate(refreshRate) {
 			log.info "${device.name} ${device.label} Refresh Scheduled for every 15 minutes"
 			break
 		default:
-			runEvery30Minutes(refresh)
-			log.info "${device.name} ${device.label} Refresh Scheduled for every 30 minutes"
+			runEvery10Minutes(refresh)
+			log.info "${device.name} ${device.label} Refresh Scheduled for every 10 minutes"
 	}
 }
 

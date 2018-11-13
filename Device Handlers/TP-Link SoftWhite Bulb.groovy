@@ -121,9 +121,24 @@ metadata {
 			details("switch", "colorTemp", "bulbMode", "refresh", "colorTempSliderControl")
 		}
 	}
+    
+    def transTime = [:]
+    transTime << ["500" : "0.5 second"]
+    transTime << ["1000" : "1 second"]
+    transTime << ["1500" : "1.5 second"]
+    transTime << ["2000" : "2 seconds"]
+    transTime << ["5000" : "5 seconds"]
+    transTime << ["10000" : "10 seconds"]
+    
+    def refreshRate = [:]
+    refreshRate << ["1" : "Refresh every minute"]
+    refreshRate << ["5" : "Refresh every 5 minutes"]
+	refreshRate << ["10" : "Refresh every 10 minutes"]
+    refreshRate << ["15" : "Refresh every 15 minutes"]
+
 	preferences {
-		input ("transition_Time", "enum", title: "Lighting Transition Time", options: ["500" : "0.5 second", "1000" : "1 second", "1500" : "1.5 second", "2000" : "2 seconds", "2500" : "2.5 seconds", "5000" : "5 seconds", "10000" : "10 seconds", "20000" : "20 seconds", "40000" : "40 seconds", "60000" : "60 seconds"], image: getDevImg("transition.png"))
-		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: ["1" : "Refresh every minute", "5" : "Refresh every 5 minutes", "10" : "Refresh every 10 minutes", "15" : "Refresh every 15 minutes", "30" : "Refresh every 30 minutes"], image: getDevImg("refresh.png"))
+		input ("transition_Time", "enum", title: "Lighting Transition Time", options: transTime, image: getDevImg("transition.png"))
+		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate, image: getDevImg("refresh.png"))
 		input ("install_Type", "enum", title: "Installation Type", options: ["Node Applet", "Kasa Account"])
 		input ("device_IP", "text", title: "Device IP (Hub Only, NNN.NNN.N.NNN)")
 		input ("gateway_IP", "text", title: "Gateway IP (Hub Only, NNN.NNN.N.NNN)")
@@ -133,7 +148,7 @@ metadata {
 //	===== Update when installed or setting changed =====
 def installed() {
 	log.info "Installing ${device.label}..."
-    setRefreshRate(30)
+    setRefreshRate(10)
     setLightTransTime("1000")
 	if (getDataValue("installType") == null) { setInstallType("Node Applet") }
 }
@@ -142,13 +157,17 @@ def ping() {
 	refresh()
 }
 
+def update() {
+    runIn(2, updated)
+}
+
 def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
 	if (refresh_Rate) { setRefreshRate(refreshRate) }
     if (transition_Time) { setLightTransTime(transitionTime) }
-    if (device_IP) { setDeviceId(device_IP) }
+    if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
     if (install_Type) { setInstallType(install_Type) }
 	sendEvent(name: "DeviceWatch-Enroll", value: groovy.json.JsonOutput.toJson(["protocol":"cloud", "scheme":"untracked"]), displayed: false)
@@ -270,13 +289,11 @@ def refreshResponse(cmdResponse){
 		default:	//	Color Bulb
 			def circadianMode = status.mode
 			def color_temp = status.color_temp
-			def hue = status.hue
+			def hue = status.hue as int
 			def saturation = status.saturation
 			def color = [:]
-			def scaledHue = status.hue
-			if (scaledHue > 0) scaledHue = status.hue / 3.6	// 0...100 scale
-			color << ["hue" : scaledHue]
-			color << ["saturation" : status.saturation]
+			color << ["hue" : hue]
+			color << ["saturation" : saturation]
 			sendEvent(name: "circadianMode", value: circadianMode)
 			sendEvent(name: "colorTemperature", value: color_temp)
 			sendEvent(name: "hue", value: hue)
@@ -409,8 +426,8 @@ def setRefreshRate(refreshRate) {
 			log.info "${device.name} ${device.label} Refresh Scheduled for every 30 minutes"
 			break
 		default:
-			runEvery30Minutes(refresh)
-			log.info "${device.name} ${device.label} Refresh Scheduled for every 30 minutes"
+			runEvery10Minutes(refresh)
+			log.info "${device.name} ${device.label} Refresh Scheduled for every 10 minutes"
 	}
 }
 

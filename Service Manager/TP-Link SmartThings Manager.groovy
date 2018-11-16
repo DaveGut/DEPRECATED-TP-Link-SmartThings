@@ -66,7 +66,6 @@ preferences {
 	page(name: "removeDevicesPage")
 	page(name: "applicationPreferencesPage")
 	page(name: "devicePreferencesPage")
-	page(name: "kasaTokenManagerPage")
 	page(name: "developerPage")
 	page(name: "developerTestingPage")
 	page(name: "hiddenPage")
@@ -103,7 +102,7 @@ def startPage() {
 	setInitialStates()
     if (installType) {
 		if (installType == "Kasa Account" && userName == null && password == null) {
-			return kasaAuthenticationPage()       	
+			return kasaAuthenticationPage()
 		} else if (installType == "Node Applet" && bridgeIp == null) {
 			return hubEnterIpPage()
 		} else {
@@ -157,19 +156,11 @@ def startPage() {
 
 //	----- Main first (landing) Pages -----
 def kasaAuthenticationPage() {
-	def loginType = "initial"
-	if ("userPassword" == null) {
-		def page1Text = "If possible, open the IDE and select Live Logging. Then, " +
-			"enter your Username and Password for the TP-Link Kasa Application. \n\r\n\r"+
-			"After entering all credentials, select 'Install Devices to Continue'.  This " +
-			"will call the Add Devices page.\n\r\n\r" +
-			"You must select and add a device to install the application!"
-    } else {
-    	loginType = "update"
-		def page1Text = "If possible, open the IDE and select Live Logging. Then, " +
-			"enter your Username and Password for TP-Link (same as Kasa app) and the "+
-			"action you want to complete."
-    }
+	def page1Text = "If possible, open the IDE and select Live Logging. Then, " +
+		"enter your Username and Password for the TP-Link Kasa Application. \n\r\n\r"+
+		"After entering all credentials, select 'Install Devices to Continue'.  This " +
+		"will call the Add Devices page.\n\r\n\r" +
+		"You must select and add a device to install the application!"
     
 	return dynamicPage (name: "kasaAuthenticationPage", 
     		title: "Initial Kasa Login Page", 
@@ -196,14 +187,10 @@ def kasaAuthenticationPage() {
 		}
         
 		section("") {
-        	if (loginType == "initial") {
-				if (state.currentError != null) {
-					paragraph "Error! Exit program and try again after resolving problem. ${state.currentError}!", image: getAppImg("error.png")
-				} else if (userName != null && userPassword != null) {
-	 				href "kasaAddDevicesPage", title: "Install Devices to Continue!", description: "Tap to continue", image: getAppImg("adddevicespage.png")
-				}
-            } else {
-				href "kasaTokenManagerPage", title: "Token Manager Page", description: "Tap to continue", image: getAppImg("userselectiontokenpage.png")
+			if (state.currentError != null) {
+				paragraph "Error! Exit program and try again after resolving problem. ${state.currentError}!", image: getAppImg("error.png")
+			} else if (userName != null && userPassword != null) {
+ 				href "kasaAddDevicesPage", title: "Install Devices to Continue!", description: "Tap to continue", image: getAppImg("adddevicespage.png")
 			}
     	}
         
@@ -330,112 +317,12 @@ def welcomePage() {
 	}
 }
 
-/*
-def kasaAuthenticationSettingsPage() {
-	def page1Text = "If possible, open the IDE and select Live Logging. Then, " +
-		"enter your Username and Password for TP-Link (same as Kasa app) and the "+
-		"action you want to complete."
-	return dynamicPage (name: "kasaAuthenticationSettingsPage", title: "Login Settings Page", install: false, uninstall: false) {
-		section("") {
-			paragraph "${appLabel()}", image: getAppImg("kasa.png")
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: getAppImg("error.png")
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Information and Instructions: ", hideable: true, hidden: true) {
-        	paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
-            paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
-		}
-        
-		section("Account Configuration: ") {
-			input ("userName", "email", title: "TP-Link Kasa Email Address", required: true, submitOnChange: false, image: getAppImg("email.png"))
-			input ("userPassword", "password", title: "TP-Link Kasa Account Password", required: true, submitOnChange: false, image: getAppImg("password.png"))
-		}
-        
-		section("") {
-			paragraph "You must select below to continue", image: getAppImg("pickapage.png")
-			href "kasaTokenManagerPage", title: "Token Manager Page", description: "Tap to continue", image: getAppImg("userselectiontokenpage.png")
-        }
-        
-		section("${textCopyright()}")
-	}
-}
-*/
-
-def kasaTokenManagerPage() {
-	def page1Text = "Your current token: ${state.TpLinkToken}" +
-		"\nAvailable actions:\n" +
-		"Update Token: Updates the token on your SmartThings Account from your TP-Link Kasa Account. \n" +
-		"Remove Token: Removes the token on your SmartThings Account from your TP-Link Kasa Account. \n" +
-		"Recheck Token: This will attempt to check if the token is valid as well as check for errors."
-		def errorMsgTok = "None"
-		if (state.TpLinkToken == null) {
-			errorMsgTok = "You will be unable to control your devices until you get a new token."
-		}
-		if (state.currentError != null) {
-			errorMsgTok = "You may not be able to control your devices until you update your credentials."
-		}
-	dynamicPage (name: "kasaTokenManagerPage", title: "Token Manager Page", install: false, uninstall: false) {
-		section("") {
-			paragraph "${appLabel()}", image: getAppImg("kasa.png")
-			if (state.currentError != null) {
-				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: getAppImg("error.png")
-			} else {
-				paragraph "No detected program errors!"
-            }
-		}
-        
-		section("Information and Instructions: ", hideable: true, hidden: true) {
-        	paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
-            paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
-		}
-        
-		section("Account Status: ") {
-			if (state.TpLinkToken != null) {
-				paragraph tokenInfoOnline(), image: getAppImg("tokenactive.png")
-			} else {
-				paragraph tokenInfoOffline(), image: getAppImg("error.png")
-			}
-		}
-        
-		section("User Configuration: ") {
-			input ("userSelectedOptionThree", "enum", title: "What do you want to do?", required: true, multiple: false, submitOnChange: true, metadata: [values:["Update Token", "Recheck Token", "Delete Token"]], image: getAppImg("token.png"))
-		}
-        
-		section("Command Status: ") {
-			if (userSelectedOptionThree != null) {
-				if (state.currentError != null) {
-					paragraph pageSelectorErrorText(), image: getAppImg("error.png")
-				} else {
-					paragraph sendingCommandSuccess(), image: getAppImg("sent.png")
-				}
-			} else {
-				paragraph sendingCommandFailed(), image: getAppImg("issue.png")
-			}
-			if (userSelectedOptionThree =~ "Update Token") {
-				getToken()
-			}
-			if (userSelectedOptionThree =~ "Delete Token") {
-				state.TpLinkToken = null
-			}
-			if (userSelectedOptionThree =~ "Recheck Token") {
-				checkError()
-			}
-		}
-        
-		section("${textCopyright()}")
-	}
-}
-
 //	----- ADD DEVICES PAGE -----
 def kasaAddDevicesPage() {
 	getToken()
 	kasaGetDevices()
 	def devices = state.devices
-	def errorMsgDev
+	def errorMsgDev = null
 	def newDevices = [:]
 	devices.each {
 		def isChild = getChildDevice(it.value.deviceMac)
@@ -461,7 +348,7 @@ def kasaAddDevicesPage() {
 			if (state.currentError != null) {
 				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: getAppImg("error.png")
             } else if (errorMsgDev != null) {
-				paragraph "ERROR:  ${errorMSgDev}", image: getAppImg("error.png")
+				paragraph "ERROR:  ${errorMsgDev}", image: getAppImg("error.png")
 			} else {
 				paragraph "No detected program errors!"
             }
@@ -490,7 +377,7 @@ def kasaAddDevicesPage() {
 def hubAddDevicesPage() {
 	hubGetDevices()
 	def devices = state.devices
-	def errorMsgDev
+	def errorMsgDev = null
 	def newDevices = [:]
 	devices.each {
 		def isChild = getChildDevice(it.value.deviceMac)
@@ -533,7 +420,7 @@ def hubAddDevicesPage() {
 			if (state.currentError != null) {
 				paragraph "ERROR:  ${state.currentError}! Correct before continuing.", image: getAppImg("error.png")
             } else if (errorMsgDev != null) {
-				paragraph "ERROR:  ${errorMSgDev}", image: getAppImg("error.png")
+				paragraph "ERROR:  ${errorMsgDev}", image: getAppImg("error.png")
 			} else {
 				paragraph "No detected program errors!"
             }

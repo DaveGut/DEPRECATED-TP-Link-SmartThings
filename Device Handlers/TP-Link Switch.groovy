@@ -156,6 +156,7 @@ def off() {
 }
 
 def setLevel(percentage) {
+	sendCmdtoServer('{"system":{"set_relay_state":{"state": 1}}}', "deviceCommand", "commandResponse")
 	if (percentage < 0 || percentage > 100) {
 		log.error "$device.name $device.label: Entered brightness is not from 0...100"
 		percentage = 50

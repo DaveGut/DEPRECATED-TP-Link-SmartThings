@@ -409,7 +409,7 @@ def currentDateResponse(cmdResponse) {
 //	----- SEND COMMAND TO CLOUD VIA SM -----
 private sendCmdtoServer(command, hubCommand, action) {
 	try {
-		if (installType() == "Cloud") {
+		if (install_Type == "Kasa Account") {
 			sendCmdtoCloud(command, hubCommand, action)
 		} else {
 			sendCmdtoHub(command, hubCommand, action)

@@ -30,6 +30,11 @@ c.  Supports running in new SmartThings phone app.
 
 d.  Eliminated support for the bulb energy monitor versions.  The bulb EM functions are not of great value.  It does provide the useage; however, for 8 hr/day, 30 day/month, the maximum energy for an LB-130 is < 2.6 KWHr (i.e., < 40 cent (US) per month).
 
+# Updates
+11-24-2018 - Added device handler and updated Service Manager for HS107 (tested) and HS300.  Issue: Hub installation.  Deferred coding for obtaining the HS107/300 device label until later.  Not a simple issue.
+
+11-24-2018 - Updated node.js applet to eliminate error in device polling causing it to crash.
+
 # Installation Prequisites:
 
 A SmartThings Hub, IDE Account and SmartThings Classic are required for all original installations.  After installation, you may (if desired) transition to the new SmartThings phone app.

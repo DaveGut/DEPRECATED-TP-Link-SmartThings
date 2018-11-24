@@ -1,9 +1,9 @@
 /*
-TP-LinkHub - Version 3.0
+TP-LinkHub - Version 3.0.2
 
-This java script uses node.js functionality to provide a hub between SmartThings and TP-Link devices.  It works with the the SmartThings application TP-Link SmartThins Manager.
+This java script uses node.js functionality to provide a hub between a Smart Hub and TP-Link devices.  It works with the the Smart Hup applications .
 01-31-2018	Release of Version 2 Hub
-11-0102018 Release of version 3 Hub
+11-01-2018 Release of version 3 Hub.  Adds support for device discovery.
 */
 
 //---- Determine if old Node version, act accordingly -------------
@@ -15,7 +15,7 @@ if (process.version == "v6.0.0-pre") {
 }
 
 //---- Program set up and global variables -------------------------
-var logFile = "yes"	//	Set to no to disable error.log file.
+var logFile = "no"	//	Set to no to disable error.log file.
 var bridgePort = 8082	//	Synched with Device Handlers.
 var hubPort = 8082	//	Synched with Device Handlers.
 var http = require('http')
@@ -40,22 +40,21 @@ for (var k in interfaces) {
 }
 var tplinkDeviceList = []
 
-//---- Start the HTTP Server Listening to SmartThings --------------
+//---- Start the HTTP Server Listening to Smart Hub --------------
 server.listen(hubPort)
-console.log("TP-Link Hub Application Console Log")
+console.log("TP-Link Hub Application Console Log V3.0.2")
 logResponse("\n\r" + new Date() + "\rTP-Link Hub Error Log")
 
 //---- Command interface to Smart Things ---------------------------
 function onRequest(request, response){
 	var command = request.headers["command"]
 	var deviceIP = request.headers["tplink-iot-ip"]
-	if (command == "pollForDevices" || command == "pollBridge") {
-		var cmdRcvd = "\n\r" + new Date() + "\r\nIP: " + command + " being executed"
+	if (command == "pollForDevices") {
+		var cmdRcvd = "\n\r" + new Date() + "\r\nIP: " + command + "being executed"
 	} else {
 		var cmdRcvd = "\n\r" + new Date() + "\r\nIP: " + deviceIP + " sent command " + command
 	}
 	console.log(" ")
-	console.log(cmdRcvd)
 	switch(command) {
 		//---- TP-Link Device Command ---------------------------
 		case "deviceCommand":
@@ -69,19 +68,13 @@ function onRequest(request, response){
 			function setPollHeader() {
 				response.setHeader("cmd-response", JSON.stringify(tplinkDeviceList))
 				response.end()
-				console.log("Sending TP-Link Device List to SmartThings")
+				console.log("Sending TP-Link Device List to the Smart Hub")
 			}
 			break
 
 		//---- Special Case for Energy Meter --------------------
 		case "emeterCmd":
 			processEmeterCommand(request, response)
-			break
-
-		case "pollBridge":
-			response.setHeader("cmd-response", "ok")
-			response.end()
-			console.log("Bridge poll response sent to SmartThings")
 			break
 
 		default:
@@ -112,6 +105,7 @@ function discoverTPLinkDevices() {
 		tplinkDevice['deviceMac'] = tplinkDNI
 		tplinkDevice['deviceIP'] = rinfo.address
 		tplinkDevice['deviceModel'] = device.model
+		tplinkDevice['deviceId'] = device.deviceId
 		tplinkDevice['alias'] = device.alias
 		tplinkDevice['gatewayIP'] = bridgeIP
 		tplinkDeviceList.push(tplinkDevice)
@@ -121,13 +115,17 @@ function discoverTPLinkDevices() {
 	})
 	var msgBuf = UdpEncrypt('{"system":{"get_sysinfo":{}}}')
 	socket.send(msgBuf, 0, msgBuf.length, pollPort, '255.255.255.255')
-	setTimeout(closeSocket, 4000)
+	setTimeout(closeSocket, 6000)
 	function closeSocket() {
-		socket.close()
+		try {
+			socket.close()
+		} catch (e) {
+			console.log("Socket Already Closed")
+		}
 	}
 }
 
-//---- Send deviceCommand and return response to SmartThings ---------
+//---- Send deviceCommand and return response to Smart Hub ---------
 function processDeviceCommand(request, response) {
 	var command = request.headers["tplink-command"]
 	var deviceIP = request.headers["tplink-iot-ip"]
@@ -146,7 +144,7 @@ function processDeviceCommand(request, response) {
 		data = decrypt(data.slice(4)).toString('ascii')
 		response.setHeader("cmd-response", data)
 		response.end()
-		var respMsg = "Command Response sent to SmartThings"
+		var respMsg = "Command Response sent to Smart Hub"
 		console.log(respMsg)
 	}).on('timeout', () => {
 		response.setHeader("cmd-response", "TcpTimeout")
@@ -163,7 +161,7 @@ function processDeviceCommand(request, response) {
 	})
 }
 
-//---- Send EmeterCmd and return response to SmartThings -------------
+//---- Send EmeterCmd and return response to Smart Hub -------------
 function processEmeterCommand(request, response) {
 	var command = request.headers["tplink-command"]
 	var deviceIP = request.headers["tplink-iot-ip"]
@@ -186,7 +184,7 @@ function processEmeterCommand(request, response) {
 			data = decrypt(concatData.slice(4)).toString('ascii')
 			response.setHeader("cmd-response", data)
 			response.end()
-			var respMsg = "Command Response sent to SmartThings"
+			var respMsg = "Command Response sent to Smart Hub"
 			console.log(respMsg)
 		} else {
 			socket.end()

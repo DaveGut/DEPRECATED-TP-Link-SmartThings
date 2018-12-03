@@ -35,13 +35,15 @@ primarily various users on GitHub.com.*/
     9.	Renumbered version to 3.5.0 to coincide with device handlers.
     	All changes should be at the 3.5.x level unless functionality
         is added (please).
+12-03-18	3.5.02.  Update to fix login problems and finalize
+			multi-plug integration.
 */
 //	===== Developer Namespace =====
 	def appNamespace()	{ return "davegut" }
 //	def appNamespace()	{ return "ramiran2" }
 //	====== Application Information =====
 	def appLabel()	{ return "TP-Link SmartThings Manager" }
-	def appVersion()	{ return "3.5.0" }
+	def appVersion()	{ return "3.5.02" }
 	def appVerDate()	{ return "10-31-2018" }
 	def appAuthor()	{ return "Dave Gutheinz, Anthony Ramirez" }
 //	===========================================================
@@ -51,9 +53,9 @@ definition (name: "${appLabel()}",
             author: "${appAuthor()}", 
             description: "${textDesc()}", 
             category: "Convenience", 
-            iconUrl: "${getAppImg("logo.png", on)}", 
-            iconX2Url: "${getAppImg("logo.png", on)}", 
-            iconX3Url: "${getAppImg("logo.png", on)}", 
+			iconUrl: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png",
+			iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png",
+			iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png",
             singleInstance: true)
 
 preferences {
@@ -117,7 +119,7 @@ def startPage() {
     page3Text += "Node Applet:  This installation requires several items. (1) An always on server (PC, Android, "
     page3Text += "or other device).  (2) The provided node.js applet up and running on the Server.  (3) Static "
     page3Text += "IP addresses for the server (bridge/hub).  It does not require login credentials."
-	return dynamicPage (name: "startPage", title: "Select Installation Type", install: false, uninstall: false) {
+	return dynamicPage (name: "startPage", title: "Select Installation Type", install: false, uninstall: true) {
 		section("") {
 			paragraph "${appLabel()}", image: getAppImg("kasa.png")
 			if (state.currentError != null) {
@@ -183,7 +185,8 @@ def kasaAuthenticationPage() {
         
 		section("Enter Kasa Account Credentials: ") {
 			input ("userName", "email", title: "TP-Link Kasa Email Address", required: true, submitOnChange: false, image: getAppImg("email.png"))
-			input ("userPassword", "password", title: "TP-Link Kasa Account Password", required: true, submitOnChange: true, image: getAppImg("password.png"))
+			input ("userPassword", "text", title: "TP-Link Kasa Account Password", required: true, submitOnChange: true, image: getAppImg("password.png"))
+//			input ("userPassword", "password", title: "TP-Link Kasa Account Password", required: true, submitOnChange: true, image: getAppImg("password.png"))
 		}
         
 		section("") {
@@ -556,7 +559,7 @@ def applicationPreferencesPage() {
         
 		section("Application Configuration: ") {
 			input ("userSelectedNotification", "bool", title: "Do you want to enable notification?", submitOnChange: false, image: getAppImg("notification.png"))
-			input ("userSelectedAppIcons", "bool", title: "Do you want to disable application icons?", submitOnChange: false, image: getAppImg("noicon.png"))
+			input ("userSelectedAppIcons", "bool", title: "Do you want to enable application icons?", submitOnChange: false, image: getAppImg("noicon.png"))
 			input ("userSelectedBrowserMode", "bool", title: "Do you want to open all external links within the SmartThings app?", submitOnChange: false, image: getAppImg("browsermode.png"))
 			input ("userSelectedReload", "bool", title: "Do you want to refresh your current state?", submitOnChange: true, image: getAppImg("sync.png"))
 			if (userSelectedAppIcons && userSelectedReload || hiddenDeveloperInput == 1) {
@@ -767,23 +770,8 @@ def hubExtractDeviceData(response) {
     }
 	state.devices = [:]
 	currentDevices.each {
-	    def plugId = ""
 	    def appServerUrl = ""
-		def deviceModel = it.deviceModel.substring(0,5)
-		if (deviceModel == "HS107" || deviceModel == "HS300") {
-			def totalPlugs = 2
-			if (deviceModel == "HS300") {
-				totalPlugs = 6
-			}
-			for (int i = 0; i < totalPlugs; i++) {
-				def deviceNetworkId = "${it.deviceMac}_0${i}"
-				def alias = "temp_0${i}"		//	Temporary Device Alias
-				plugId = "${it.deviceId}0${i}"
-                updateDevices(deviceNetworkId, alias, deviceModel, plugId, it.deviceId, appServerUrl, it.deviceIP)
-			}
-		} else {
-            updateDevices(it.deviceMac, it.alias, deviceModel, plugId, it.deviceId, appServerUrl, it.deviceIP)
-		}
+        updateDevices(it.deviceMac, it.alias, it.deviceModel, it.plugId, it.deviceId, appServerUrl, it.deviceIP)
 	}
     unschedule(createBridgeError)
 	state.currentError = null
@@ -1536,8 +1524,15 @@ def appInfoDesc()	{
 	return str
 }
 
+def getAppImg(imgName) { 
+	if (!userSelectedAppIcons || userSelectedAppIcons == false) {
+    	return
+    } else {
+        return "https://raw.githubusercontent.com/${gitPath()}/images/$imgName"
+    }
+}
+
 	def gitBranch()	{ return betaMarker() ? "beta" : "master" }
-	def getAppImg(imgName, on = null)	{ return (!userSelectedAppIcons || on) ? "https://raw.githubusercontent.com/${gitPath()}/images/$imgName" : "" }
 	def getWikiPageUrl()	{ return "https://github.com/${gitRepo()}/wiki" }
 	def getIssuePageUrl()	{ return "https://github.com/${gitRepo()}/issues" }
 	def strBrowserMode()	{ return (userSelectedBrowserMode) ? "embedded" : "external" }

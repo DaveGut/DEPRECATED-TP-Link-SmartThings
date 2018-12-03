@@ -28,11 +28,13 @@ primarily various users on GitHub.com.
             	available in new phone app).
             c.	Added capability to remove devices.
             d.	Reworked HMI and improved information.
+12-0302018	Updated to finalize multi-plug integration and
+			(attempt) to ease login issues.
 	====== Application Information ==========================*/
 	def textCopyright()	{ return "Copyright© 2018 - Dave Gutheinz, Anthony Ramirez" }
 	def appNamespace() { return "davegut" }
 	def appLabel() { return "TP-Link SmartThings Manager (lite)" }
-	def appVersion() { return "3.5.0" }
+	def appVersion() { return "3.5.02" }
 	def appVerDate() { return "11-02-2018" }
 //	===========================================================
 
@@ -162,7 +164,7 @@ def kasaAuthenticationPage() {
             
 		section("Enter Kasa Account Credentials: ") {
 			input ("userName", "email", title: "TP-Link Kasa Email Address", required: true, submitOnChange: false)
-			input ("userPassword", "password", title: "Kasa Account Password", required: true, submitOnChange: true)
+			input ("userPassword", "text", title: "Kasa Account Password", required: true, submitOnChange: true)
 		}
         
 		section("") {
@@ -637,23 +639,8 @@ def hubExtractDeviceData(response) {
     }
 	state.devices = [:]
 	currentDevices.each {
-	    def plugId = ""
 	    def appServerUrl = ""
-		def deviceModel = it.deviceModel.substring(0,5)
-		if (deviceModel == "HS107" || deviceModel == "HS300") {
-			def totalPlugs = 2
-			if (deviceModel == "HS300") {
-				totalPlugs = 6
-			}
-			for (int i = 0; i < totalPlugs; i++) {
-				def deviceNetworkId = "${it.deviceMac}_0${i}"
-				def alias = "temp_0${i}"		//	Temporary Device Alias
-				plugId = "${it.deviceId}0${i}"
-                updateDevices(deviceNetworkId, alias, deviceModel, plugId, it.deviceId, appServerUrl, it.deviceIP)
-			}
-		} else {
-            updateDevices(it.deviceMac, it.alias, deviceModel, plugId, it.deviceId, appServerUrl, it.deviceIP)
-		}
+        updateDevices(it.deviceMac, it.alias, it.deviceModel, it.plugId, it.deviceId, appServerUrl, it.deviceIP)
 	}
     unschedule(createBridgeError)
 	state.currentError = null

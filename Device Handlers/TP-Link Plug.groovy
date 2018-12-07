@@ -32,7 +32,7 @@ TP-Link devices; primarily various users on GitHub.com.
            	With great appreciation to Anthony Ramirez for
             his assistance as well as leading the development
             of the new Service Manager.
-    
+12.07.18	3.5.03.  Corrected refresh rate update issue.
 ======== DO NOT EDIT LINES BELOW ===*/
 //	===== Device Type Identifier =====
 	def deviceType()	{ return "Plug" }
@@ -45,7 +45,7 @@ TP-Link devices; primarily various users on GitHub.com.
 	def ocfValue() { return (deviceType() == "Plug") ? "oic.d.smartplug" : "oic.d.switch" }
 	def vidValue() { return (deviceType() == "Dimming Switch") ? "generic-dimmer" : "generic-switch" }
 	def deviceIcon()	{ return (deviceType() == "Plug") ? "st.Appliances.appliances17" : "st.Home.home30" }
-	def devVer()	{ return "3.5.0" }
+	def devVer()	{ return "3.5.03" }
 //	======================================================================================================================
 
 metadata {
@@ -99,7 +99,7 @@ metadata {
     refreshRate << ["15" : "Refresh every 15 minutes"]
 
 	preferences {
-		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate, image: getDevImg("refresh.png"))
+		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate)
 		input ("device_IP", "text", title: "Device IP (Hub Only, NNN.NNN.N.NNN)")
 		input ("gateway_IP", "text", title: "Gateway IP (Hub Only, NNN.NNN.N.NNN)")
 	}
@@ -127,7 +127,7 @@ def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
-	if (refreshRate) { setRefreshRate(refreshRate) }
+	if (refreshRate) { setRefreshRate(refresh_Rate) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
 	sendEvent(name: "DeviceWatch-Enroll", value: groovy.json.JsonOutput.toJson(["protocol":"cloud", "scheme":"untracked"]), displayed: false)

@@ -31,6 +31,7 @@ TP-Link devices; primarily various users on GitHub.com.
            	With great appreciation to Anthony Ramirez for
             his assistance as well as leading the development
             of the new Service Manager.
+12.07.18	3.5.03.  Corrected error in Refresh rate.
 ======== DO NOT EDIT LINES BELOW ===*/
 //	===== Device Type Identifier =====
 //	def deviceType()	{ return "Soft White Bulb" }
@@ -40,7 +41,7 @@ TP-Link devices; primarily various users on GitHub.com.
 	def devNamespace()	{ return "davegut" }
 //	def devNamespace()	{ return "ramiran2" }
 //	======== Other System Values =============================================================
-	def devVer()	{ return "3.5.0" }
+	def devVer()	{ return "3.5.03" }
 	def ocfValue()	{ return "oic.d.light" }
 	def vidValue()	{ return "generic-rgbw-color-bulb" }
 //	==========================================================================================
@@ -137,8 +138,8 @@ metadata {
     refreshRate << ["15" : "Refresh every 15 minutes"]
 
 	preferences {
-		input ("transition_Time", "enum", title: "Lighting Transition Time", options: transTime, image: getDevImg("transition.png"))
-		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate, image: getDevImg("refresh.png"))
+		input ("transition_Time", "enum", title: "Lighting Transition Time", options: transTime)
+		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate)
 		input ("device_IP", "text", title: "Device IP (Hub Only, NNN.NNN.N.NNN)")
 		input ("gateway_IP", "text", title: "Gateway IP (Hub Only, NNN.NNN.N.NNN)")
 	}
@@ -167,7 +168,7 @@ def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
-	if (refresh_Rate) { setRefreshRate(refreshRate) }
+	if (refresh_Rate) { setRefreshRate(refresh_Rate) }
     if (transition_Time) { setLightTransTime(transitionTime) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
@@ -404,6 +405,7 @@ def setLightTransTime(newTransTime) {
 }
 
 def setRefreshRate(refreshRate) {
+log.error refreshRate
 	switch(refreshRate) {
 		case "1" :
 			runEvery1Minute(refresh)
@@ -420,10 +422,6 @@ def setRefreshRate(refreshRate) {
 		case "15" :
 			runEvery15Minutes(refresh)
 			log.info "${device.name} ${device.label} Refresh Scheduled for every 15 minutes"
-			break
-		case "30" :
-			runEvery30Minutes(refresh)
-			log.info "${device.name} ${device.label} Refresh Scheduled for every 30 minutes"
 			break
 		default:
 			runEvery10Minutes(refresh)

@@ -33,6 +33,7 @@ TP-Link devices; primarily various users on GitHub.com.
             his assistance as well as leading the development
             of the new Service Manager.
 2018-11-24	Created Multi-Plug Version
+12.08.18	3.5.03.  Corrected refresh rate update issue.
     
 ======== DO NOT EDIT LINES BELOW ===*/
 //	===== Device Type Identifier =====
@@ -44,7 +45,7 @@ TP-Link devices; primarily various users on GitHub.com.
 	def ocfValue() { return (deviceType() == "Plug") ? "oic.d.smartplug" : "oic.d.switch" }
 	def vidValue() { return (deviceType() == "Dimming Switch") ? "generic-dimmer" : "generic-switch" }
 	def deviceIcon()	{ return (deviceType() == "Plug") ? "st.Appliances.appliances17" : "st.Home.home30" }
-	def devVer()	{ return "3.5.0" }
+	def devVer()	{ return "3.5.08" }
 //	======================================================================================================================
 
 metadata {
@@ -118,7 +119,7 @@ def update() {
 def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
-	if (refreshRate) { setRefreshRate(refreshRate) }
+	if (refreshRate) { setRefreshRate(refresh_Rate) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
 	if (plug_No) { sendCmdtoServer('{"system" :{"get_sysinfo" :{}}}', "deviceCommand", "parsePlugId") }

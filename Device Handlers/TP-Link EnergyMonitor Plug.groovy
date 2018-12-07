@@ -31,13 +31,13 @@ TP-Link devices; primarily various users on GitHub.com.
            	With great appreciation to Anthony Ramirez for
             his assistance as well as leading the development
             of the new Service Manager.
-    
+12.07.18	3.5.03.  Corrected refresh rate update error.
 //	====== Device Namespace =====*/
 	def devNamespace()	{ return "davegut" }
 //	def devNamespace()	{ return "ramiran2" }
 //	========Other System Value ===============================
 	def deviceType() { return "Energy Monitor Plug" }
-	def devVer() { return "3.5.0" }
+	def devVer() { return "3.5.03" }
 //	===========================================================
 
 metadata {
@@ -123,7 +123,7 @@ metadata {
     refreshRate << ["15" : "Refresh every 15 minutes"]
 
 	preferences {
-		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate, image: getDevImg("refresh.png"))
+		input ("refresh_Rate", "enum", title: "Device Refresh Rate", options: refreshRate)
 		input ("device_IP", "text", title: "Device IP (Hub Only, NNN.NNN.N.NNN)")
 		input ("gateway_IP", "text", title: "Gateway IP (Hub Only, NNN.NNN.N.NNN)")
 	}
@@ -154,7 +154,7 @@ def updated() {
 	state.getTimeText = "time"
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
-	if (refreshRate) { setRefreshRate(refreshRate) }
+	if (refreshRate) { setRefreshRate(refresh_Rate) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
     if (install_Type) { setInstallType(install_Type) }

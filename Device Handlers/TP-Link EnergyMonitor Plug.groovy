@@ -417,7 +417,7 @@ private sendCmdtoServer(command, hubCommand, action) {
 			sendCmdtoHub(command, hubCommand, action)
 		}
 	} catch (ex) {
-		log.error "Sending Command Exception:", ex
+		log.error "Sending Command Exception: ${ex}.  Communications error with device."
 	}
 }
 

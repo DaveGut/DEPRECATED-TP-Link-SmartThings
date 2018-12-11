@@ -316,7 +316,7 @@ def refreshResponse(cmdResponse){
 private sendCmdtoServer(command, hubCommand, action) {
 	try {
     	def installType = getDataValue("installType")
-		if (installType == "Kasa Account" || installType == "Cloud") {
+		if (installType == "Kasa Account") {
 			sendCmdtoCloud(command, hubCommand, action)
 		} else {
 	    	def deviceIP = getDataValue("deviceIP")
@@ -330,7 +330,7 @@ private sendCmdtoServer(command, hubCommand, action) {
 			}
 		}
 	} catch (ex) {
-		log.error "Sending Command Exception: ", ex
+		log.error "Sending Command Exception: ${ex}.  Communications error with device."
 	}
 }
 
@@ -405,7 +405,6 @@ def setLightTransTime(newTransTime) {
 }
 
 def setRefreshRate(refreshRate) {
-log.error refreshRate
 	switch(refreshRate) {
 		case "1" :
 			runEvery1Minute(refresh)

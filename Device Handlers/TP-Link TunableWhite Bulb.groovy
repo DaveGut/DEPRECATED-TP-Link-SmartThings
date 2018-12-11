@@ -405,7 +405,6 @@ def setLightTransTime(newTransTime) {
 }
 
 def setRefreshRate(refreshRate) {
-log.error refreshRate
 	switch(refreshRate) {
 		case "1" :
 			runEvery1Minute(refresh)

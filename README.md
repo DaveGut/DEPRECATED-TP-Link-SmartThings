@@ -10,7 +10,7 @@ b.  Node Applet.  Smart Application integration via a home wifi Node.JS bridge (
 c.  Manual Node Installation.  Traditional Hub installation.  Does not use a Smart Application.
 
 # Updates
-12-12-2018 - Fixed SmartApp handling of HS107 and HS300.  After installed, if user unplugs (or is off-line) the device and subsequently tries to add a device, the SmartApp crashed.  Fix will not add the offending device to the currentDevices Array.  Impact:  User may not be able to remove the device using the SmartApp under certain circumstances.  Manual removal via classic Phone App or the IDE My Devices page will work.
+12-12-2018 - 3.5.03.  Fixed SmartApp handling of HS107 and HS300.  After installed, if user unplugs (or is off-line) the device and subsequently tries to add a device, the SmartApp crashed.  Fix will not add the offending device to the currentDevices Array.  Impact:  User may not be able to remove the device using the SmartApp under certain circumstances.  Manual removal via classic Phone App or the IDE My Devices page will work.
 
 11-24-2018 - Added device handler and updated Service Manager for HS107 (tested) and HS300.  Issue: Hub installation.  Deferred coding for obtaining the HS107/300 device label until later.  Not a simple issue.
 

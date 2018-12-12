@@ -36,6 +36,11 @@ c.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses for 
 Installation instruction can be found in the Documentation Folders.  These are step-by-step and are for users new to SmartThings.  However, they have not been modified from the previous version yet.
 
 a.  Install the relevant installation file(s):
+
+    Note:  If you have enabled GitHub integration in SmartThings, the repository settings are:
+            Owner: davegut
+            Name: SmartThingsPublic
+            Branch: master
     
     1.  Go to the MyDeviceHandler page on the IDE, select 'Create New Device Handler'  Select 'From Code'.
     
@@ -49,8 +54,8 @@ a.  Install the relevant installation file(s):
     
     6.  Seleect 'Create'.  Select 'Publish' 'For Me'
     
-    7.  For Node Applet installations, copy the new 'TP-LinkHub_v3.js' and (for PC) 'TP-LinkHub_v3.bat' files and install on your hub. 
-
+    7.  For Node Applet installations, copy the new 'TP-LinkHub_v3.js' and (for PC) 'TP-LinkHub_v3.bat' files and install on your hub.
+    
 b.  Installation of 'Kasa Account' or 'Node Applet' integrations.
 
     1.  From the SmartThings Classic phone app, select 'SmartApps', then 'Add a SmartApp'.  Select 'My Apps' at bottom of next page.  Select 'TP-Link SmartThings Manager' from the 'My Apps' page.

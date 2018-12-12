@@ -9,28 +9,9 @@ b.  Node Applet.  Smart Application integration via a home wifi Node.JS bridge (
 
 c.  Manual Node Installation.  Traditional Hub installation.  Does not use a Smart Application.
 
-# Major changes:
-SmartApplication:
-
-a.  Support hub-based installations; including, (1) finding device IPs and installing, (2) changing the device IP automatically (checked every 5 minutes), and changing the bridge IP.
-
-b.  Added Update Device Preferences to update Bulb Transition Time and Refresh Rate (not available on the new ST phone app).
-
-c.  New help and informaton sections; including, periodic checking for updates.
-
-d.  After initial installation, runs on the new SmartThings phone app.
-
-Device Handlers:
-
-a.  Eliminated the separate Hub and Cloud Handlers.
-
-b.  Still supports manual HUb installations.  When installing will have to select installType = 'Node Applet'
-
-c.  Supports running in new SmartThings phone app.
-
-d.  Eliminated support for the bulb energy monitor versions.  The bulb EM functions are not of great value.  It does provide the useage; however, for 8 hr/day, 30 day/month, the maximum energy for an LB-130 is < 2.6 KWHr (i.e., < 40 cent (US) per month).
-
 # Updates
+12-12-2018 - Fixed SmartApp handling of HS107 and HS300.  After installed, if user unplugs (or is off-line) the device and subsequently tries to add a device, the SmartApp crashed.  Fix will not add the offending device to the currentDevices Array.  Impact:  User may not be able to remove the device using the SmartApp under certain circumstances.  Manual removal via classic Phone App or the IDE My Devices page will work.
+
 11-24-2018 - Added device handler and updated Service Manager for HS107 (tested) and HS300.  Issue: Hub installation.  Deferred coding for obtaining the HS107/300 device label until later.  Not a simple issue.
 
 11-24-2018 - Updated node.js applet to eliminate error in device polling causing it to crash.
@@ -86,7 +67,7 @@ c.  Installation of Manual Node Installation
   
   3.  From the pull-down 'Type', select the appropriate device type (handler).  Select 'Location' (your hub).
   
-  4.  In 'My devices or on the phone (Classic App) for each device, select preferences.  Inter InstallType, Bridge IP, and Device IP and save.
+  4.  In 'My devices or on the phone (Classic App) for each device, select preferences.  Enter the Bridge IP, and Device IP and save.
   
   5.  You can now use either phone app to control the device.  Prefernces can only be updated on the IDE or the classic app.
 

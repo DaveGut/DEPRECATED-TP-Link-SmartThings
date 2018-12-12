@@ -1,50 +1,38 @@
 /*
-TP-Link SmartThings Manager and TP-Link Cloud Connect, 2018 Version 4
+TP-Link SmartThings Manager and TP-Link Cloud Connect, 2018 Version 3.5
+
 	Copyright 2018 Dave Gutheinz, Anthony Ramirez
+    
 Licensed under the Apache License, Version 2.0 (the "License"); you
 may not use this file except in compliance with the License. You may
 obtain a copy of the License at:
+
 	http://www.apache.org/licenses/LICENSE-2.0
+    
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License.
+
 Discalimer: This Service Manager and the associated Device
 Handlers are in no way sanctioned or supported by TP-Link. All
 development is based upon open-source data on the TP-Link Kasa Devices;
-primarily various users on GitHub.com.*/
+primarily various users on GitHub.com.
 
-/*	===== CHANGES =====
-	1.  User selection of installType.  Resultant single appLabel.
-		Various logic entries usiing installType.
-    2.	User entry of bridgeIp for the node applet selection.
-    	Didn't add bridge discovery.  Too many of the node devices
-        are not ssdp (raspberry pi, android, fire tablets)
-    3.	added hubGetDevices.  Added runEvery5 for this.
-    4.	added bridge health-check running every 5 minutes.
-    5.	Cleaned up kasaXxxxxx and hubXxxxx pageName nomenclature to
-    	minimize naming.
-    6.	Removed userSelectedDevicesOne selections.  Was confusing 
-    	and caused errors.  Single welcome page with the options
-        also works best.
-    7.	Reworked page top to always display app name and Error (if any).
-    	Reworked second section to Information and Help - hideable/hidden.
-        Now contains addition app info plus help text.
-    8.	Made Help and Feedback hideable/hidden.
-    9.	Renumbered version to 3.5.0 to coincide with device handlers.
-    	All changes should be at the 3.5.x level unless functionality
-        is added (please).
+	===== CHANGES =====
 12-03-18	3.5.02.  Update to fix login problems and finalize
 			multi-plug integration.
+12.12.18	3.5.03.  Fixed error causing crash when installed multi-
+			plug is offline and user attempts to add a device.
 */
 //	===== Developer Namespace =====
 	def appNamespace()	{ return "davegut" }
 //	def appNamespace()	{ return "ramiran2" }
 //	====== Application Information =====
 	def appLabel()	{ return "TP-Link SmartThings Manager" }
-	def appVersion()	{ return "3.5.02" }
-	def appVerDate()	{ return "10-31-2018" }
+	def appVersion()	{ return "3.5.03" }
+	def appVerDate()	{ return "12-12-2018" }
 	def appAuthor()	{ return "Dave Gutheinz, Anthony Ramirez" }
 //	===========================================================
 
@@ -736,19 +724,23 @@ def kasaGetDevices() {
 			if (deviceModel == "HS300") {
 				totalPlugs = 6
 			}
-			for (int i = 0; i < totalPlugs; i++) {
-				def deviceNetworkId = "${it.deviceMac}_0${i}"
-				plugId = "${it.deviceId}0${i}"
-				def sysinfo = sendDeviceCmd(it.appServerUrl, it.deviceId, '{"system" :{"get_sysinfo" :{}}}')
-				def children = sysinfo.system.get_sysinfo.children
-				def alias
-				children.each {
-					if (it.id == plugId) {
-						alias = it.alias
+            try {
+				for (int i = 0; i < totalPlugs; i++) {
+					def deviceNetworkId = "${it.deviceMac}_0${i}"
+					plugId = "${it.deviceId}0${i}"
+					def sysinfo = sendDeviceCmd(it.appServerUrl, it.deviceId, '{"system" :{"get_sysinfo" :{}}}')
+					def children = sysinfo.system.get_sysinfo.children
+					def alias
+					children.each {
+						if (it.id == plugId) {
+							alias = it.alias
+						}
 					}
+	                updateDevices(deviceNetworkId, alias, deviceModel, plugId, it.deviceId, it.appServerUrl, deviceIP)
 				}
-                updateDevices(deviceNetworkId, alias, deviceModel, plugId, it.deviceId, it.appServerUrl, deviceIP)
-			}
+            } catch (error) {
+	            log.info "${deviceModel} with DNI ${it.deviceMac} is offline and not added to currentDevices."
+            }
 		} else {
             updateDevices(it.deviceMac, it.alias, deviceModel, plugId, it.deviceId, it.appServerUrl, deviceIP)
 		}

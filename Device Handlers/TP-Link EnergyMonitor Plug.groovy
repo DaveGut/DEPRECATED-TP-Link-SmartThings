@@ -154,7 +154,7 @@ def updated() {
 	state.getTimeText = "time"
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
-	if (refreshRate) { setRefreshRate(refresh_Rate) }
+	if (refresh_Rate) { setRefreshRate(refresh_Rate) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
     if (install_Type) { setInstallType(install_Type) }

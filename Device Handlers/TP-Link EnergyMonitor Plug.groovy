@@ -132,7 +132,7 @@ metadata {
 //	===== Update when installed or setting changed =====
 def installed() {
 	log.info "Installing ${device.label}..."
-    setRefreshRate(10)
+    updateDataValue("refreshRate", "10")
 	if(getDataValue("installType") == null) {
 		setInstallType("Node Applet")
 	}
@@ -154,7 +154,11 @@ def updated() {
 	state.getTimeText = "time"
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
-	if (refresh_Rate) { setRefreshRate(refresh_Rate) }
+	if (!refresh_Rate) {
+    	setRefreshRate(getDataValue("refreshRate"))
+    } else {
+    	setRefreshRate(refresh_Rate)
+    }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
     if (install_Type) { setInstallType(install_Type) }
@@ -513,6 +517,7 @@ def setLightTransTime(lightTransTime) {
 }
 
 def setRefreshRate(refreshRate) {
+	updateDataValue("refreshRate", refreshRate)
 	switch(refreshRate) {
 		case "1" :
 			runEvery1Minute(refresh)

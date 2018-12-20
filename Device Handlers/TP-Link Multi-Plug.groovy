@@ -119,7 +119,7 @@ def update() {
 def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
-	if (refreshRate) { setRefreshRate(refresh_Rate) }
+	if (refresh_Rate) { setRefreshRate(refresh_Rate) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
 	if (plug_No) { sendCmdtoServer('{"system" :{"get_sysinfo" :{}}}', "deviceCommand", "parsePlugId") }

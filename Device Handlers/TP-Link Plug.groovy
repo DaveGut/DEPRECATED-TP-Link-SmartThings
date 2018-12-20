@@ -127,7 +127,7 @@ def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
-	if (refreshRate) { setRefreshRate(refresh_Rate) }
+	if (refresh_Rate) { setRefreshRate(refresh_Rate) }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
 	sendEvent(name: "DeviceWatch-Enroll", value: groovy.json.JsonOutput.toJson(["protocol":"cloud", "scheme":"untracked"]), displayed: false)

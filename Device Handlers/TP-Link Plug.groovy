@@ -1,26 +1,20 @@
 /*
 TP-Link Plug and Switch Device Handler, 2018, Version 3
-
 	Copyright 2018 Dave Gutheinz and Anthony Ramirez
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this  file except in compliance with the
 License. You may obtain a copy of the License at:
-
 	http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, 
 software distributed under the License is distributed on an 
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
 either express or implied. See the License for the specific 
 language governing permissions and limitations under the 
 License.
-
 Discalimer:  This Service Manager and the associated Device 
 Handlers are in no way sanctioned or supported by TP-Link.  
 All  development is based upon open-source data on the 
 TP-Link devices; primarily various users on GitHub.com.
-
 ========= History ============================================
 2018-10-23	Update to Version 3.5:
 			a.	Compatibility with new SmartThings app.
@@ -108,7 +102,7 @@ metadata {
 //	===== Update when installed or setting changed =====
 def installed() {
 	log.info "Installing ${device.label}..."
-    setRefreshRate(10)
+    updateDataValue("refreshRate", "10")
 	if(getDataValue("installType") == null) {
 		setInstallType("Node Applet")
 	}
@@ -127,7 +121,11 @@ def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
     if (getDataValue("installType") == null) { setInstallType("Node Applet") }
-	if (refresh_Rate) { setRefreshRate(refresh_Rate) }
+	if (!refresh_Rate) {
+    	setRefreshRate(getDataValue("refreshRate"))
+    } else {
+    	setRefreshRate(refresh_Rate)
+    }
     if (device_IP) { setDeviceIP(device_IP) }
     if (gateway_IP) { setGatewayIP(gateway_IP) }
 	sendEvent(name: "DeviceWatch-Enroll", value: groovy.json.JsonOutput.toJson(["protocol":"cloud", "scheme":"untracked"]), displayed: false)
@@ -270,6 +268,7 @@ def setLightTransTime(lightTransTime) {
 }
 
 def setRefreshRate(refreshRate) {
+	updateDataValue("refreshRate", refreshRate)
 	switch(refreshRate) {
 		case "1" :
 			runEvery1Minute(refresh)

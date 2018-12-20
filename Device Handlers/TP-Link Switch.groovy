@@ -108,7 +108,7 @@ metadata {
 //	===== Update when installed or setting changed =====
 def installed() {
 	log.info "Installing ${device.label}..."
-    setRefreshRate(10)
+    setRefresh_Rate(10)
 	if(getDataValue("installType") == null) {
 		setInstallType("Node Applet")
 	}

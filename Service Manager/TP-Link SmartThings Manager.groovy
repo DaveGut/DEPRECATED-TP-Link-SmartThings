@@ -25,14 +25,15 @@ primarily various users on GitHub.com.
 			multi-plug integration.
 12.12.18	3.5.03.  Fixed error causing crash when installed multi-
 			plug is offline and user attempts to add a device.
+30.12.18    	3.5.04. Modification by Paul Harris to remove SmartThings Hub dependency
 */
 //	===== Developer Namespace =====
 	def appNamespace()	{ return "davegut" }
 //	def appNamespace()	{ return "ramiran2" }
 //	====== Application Information =====
 	def appLabel()	{ return "TP-Link SmartThings Manager" }
-	def appVersion()	{ return "3.5.03" }
-	def appVerDate()	{ return "12-12-2018" }
+	def appVersion()	{ return "3.5.04" }
+	def appVerDate()	{ return "30-12-2018" }
 	def appAuthor()	{ return "Dave Gutheinz, Anthony Ramirez" }
 //	===========================================================
 
@@ -69,12 +70,13 @@ def setInitialStates() {
 	if (!state.devices) {state.devices = [:]}
 	if (!state.currentError) {state.currentError = null}
 	if (!state.errorCount) {state.errorCount = 0}
+    	if (!state.TpLinkClientUUID) {state.TpLinkClientUUID = UUID.randomUUID().toString()} // generate a random uuid to use for TPLink Cloud Auth.
 	settingUpdate("userSelectedReload", "false", "bool")
 	settingRemove("userSelectedDevicesRemove")
 	settingRemove("userSelectedDevicesAdd")
 	settingRemove("userSelectedDevicesToUpdate")
 	settingRemove("userSelectedOptionThree")
-    settingRemove("userSelectedOptionTwo")
+    	settingRemove("userSelectedOptionTwo")
 	if ("${userName}" =~ null || "${userPassword}" =~ null) {
 		settingRemove("userName")
 		settingRemove("userPassword")
@@ -100,13 +102,13 @@ def startPage() {
         }
     }
 	def page2Text = ""
-    def page3Text = ""
+    	def page3Text = ""
 	def page1Text = "Before the installation, the installation type must be entered.  There are two options:"
-    page2Text += "Kasa Account:  This is the cloud based entry.  It requires that the user provide "
-    page2Text += "enter their Kasa Account login and password to install the devices."
-    page3Text += "Node Applet:  This installation requires several items. (1) An always on server (PC, Android, "
-    page3Text += "or other device).  (2) The provided node.js applet up and running on the Server.  (3) Static "
-    page3Text += "IP addresses for the server (bridge/hub).  It does not require login credentials."
+    	page2Text += "Kasa Account:  This is the cloud based entry.  It requires that the user provide "
+    	page2Text += "enter their Kasa Account login and password to install the devices."
+    	page3Text += "Node Applet:  This installation requires several items. (1) An always on server (PC, Android, "
+    	page3Text += "or other device).  (2) The provided node.js applet up and running on the Server.  (3) Static "
+    	page3Text += "IP addresses for the server (bridge/hub).  It does not require login credentials."
 	return dynamicPage (name: "startPage", title: "Select Installation Type", install: false, uninstall: true) {
 		section("") {
 			paragraph "${appLabel()}", image: getAppImg("kasa.png")
@@ -118,16 +120,16 @@ def startPage() {
 		}
         
 		section("Information and Instructions: ", hideable: true, hidden: true) {
-        	paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
-            paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
-            paragraph page2Text
-            paragraph page3Text
+        		paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
+            		paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
+            		paragraph page2Text
+            		paragraph page3Text
 		}
         
 		section("") {
 			input ("installType", "enum", title: "Select Installation Type", required: true, multiple: false, 
-            	   submitOnChange: true, metadata: [values:["Kasa Account", "Node Applet"]], 
-                   image: "https://s3.amazonaws.com/smartapp-icons/Meta/text@2x.png")
+            	   	submitOnChange: true, metadata: [values:["Kasa Account", "Node Applet"]], 
+                  	image: "https://s3.amazonaws.com/smartapp-icons/Meta/text@2x.png")
  		}
         
 		section("Help and Feedback: ", hideable: true, hidden: true) {
@@ -154,9 +156,9 @@ def kasaAuthenticationPage() {
     
 	return dynamicPage (name: "kasaAuthenticationPage", 
     		title: "Initial Kasa Login Page", 
-            nextPage: "kasaAddDevicesPage", 
-            install: false, 
-            uninstall: false) {
+           	nextPage: "kasaAddDevicesPage", 
+            	install: false, 
+            	uninstall: false) {
 		section("") {
 			paragraph "${appLabel()}", image: getAppImg("kasa.png")
 			if (state.currentError != null) {
@@ -168,13 +170,12 @@ def kasaAuthenticationPage() {
         
 		section("Information and Instructions: ", hideable: true, hidden: true) {
         	paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
-            paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
+            	paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
 		}
         
-		section("Enter Kasa Account Credentials: ") {
+			section("Enter Kasa Account Credentials: ") {
 			input ("userName", "email", title: "TP-Link Kasa Email Address", required: true, submitOnChange: false, image: getAppImg("email.png"))
-			input ("userPassword", "text", title: "TP-Link Kasa Account Password", required: true, submitOnChange: true, image: getAppImg("password.png"))
-//			input ("userPassword", "password", title: "TP-Link Kasa Account Password", required: true, submitOnChange: true, image: getAppImg("password.png"))
+			input ("userPassword", "password", title: "TP-Link Kasa Account Password", required: true, submitOnChange: true, image: getAppImg("password.png"))
 		}
         
 		section("") {
@@ -214,8 +215,8 @@ def hubEnterIpPage() {
 		}
         
 		section("Information and Instructions: ", hideable: true, hidden: true) {
-        	paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
-            paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
+        		paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
+            		paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
 		}
         
 		section("") {
@@ -259,8 +260,8 @@ def welcomePage() {
 		}
         
 		section("Information and Instructions: ", hideable: true, hidden: true) {
-        	paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
-            paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
+        		paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
+           		paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
 		}
         
 		section("Device Manager: ") {
@@ -383,22 +384,22 @@ def hubAddDevicesPage() {
 		errorMsgDev = "No new devices to add. Check: 1) Device installed to Kasa properly, " +
         "2) The SmartThings MyDevices (in case already installed)."
 	}
-    def page1Text = ""
-    def page2Text = ""
-    def page3Text = ""
-    def page4Text = ""
-    def page5Text = ""
-    def page6Text = ""
+	def page1Text = ""
+	def page2Text = ""
+	def page3Text = ""
+	def page4Text = ""
+	def page5Text = ""
+	def page6Text = ""
 	page1Text = "This page installs the devices through the running node applet. "
-    page1Text += "On initial installation, an error will be displayed until the "
-    page1Text += "node applet returns the device data."
-    page2Text = "1.  Assure that the node applet is running."
-    page3Text = "2.  Wait for a device count equal to your devices to appear in "
-    page3Text += "'Selet Devices to Add' string."
-    page4Text = "3.  Select the devices you want to install."
-    page5Text = "4.  Select 'DONE' in upper right corner to install the devices and "
-    page5Text += "install the Application."
-    page6Text = "5.  To cancel, select '<' in the upper left corner."
+	page1Text += "On initial installation, an error will be displayed until the "
+	page1Text += "node applet returns the device data."
+	page2Text = "1.  Assure that the node applet is running."
+	page3Text = "2.  Wait for a device count equal to your devices to appear in "
+	page3Text += "'Selet Devices to Add' string."
+	page4Text = "3.  Select the devices you want to install."
+	page5Text = "4.  Select 'DONE' in upper right corner to install the devices and "
+	page5Text += "install the Application."
+	page6Text = "5.  To cancel, select '<' in the upper left corner."
 	return dynamicPage(name:"hubAddDevicesPage",
 		title:"Node Applet: Add TP-Link Devices",
 		nextPage:"",
@@ -418,13 +419,13 @@ def hubAddDevicesPage() {
 		}
         
 		section("Information and Instructions: ", hideable: true, hidden: true) {
-        	paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
-            paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
-            paragraph page2Text
-            paragraph page3Text
-            paragraph page4Text
-            paragraph page5Text
-            paragraph page6Text
+        		paragraph title: "Program Information: ", appInfoDesc(), image: getAppImg("kasa.png")
+		    	paragraph title: "Instructions", page1Text, image: getAppImg("information.png")
+		    	paragraph page2Text
+		    	paragraph page3Text
+		    	paragraph page4Text
+		    	paragraph page5Text
+		    	paragraph page6Text
 		}
         
  		section("Device Controller: ") {
@@ -647,14 +648,13 @@ def uninstallPage() {
 
 //	----- GET A NEW TOKEN FROM CLOUD -----
 def getToken() {
-	def hub = location.hubs[0]
 	def cmdBody = [
 		method: "login",
 		params: [
 			appType: "Kasa_Android",
 			cloudUserName: "${userName}",
 			cloudPassword: "${userPassword}",
-			terminalUUID: "${hub.id}"
+			terminalUUID: "${state.TpLinkClientUUID}"
 		]
 	]
 	def getTokenParams = [
@@ -716,7 +716,7 @@ def kasaGetDevices() {
 	}
 	state.devices = [:]
 	currentDevices.each {
-		def deviceModel = it.deviceModel.substring(0,5)
+	def deviceModel = it.deviceModel.substring(0,5)
         def plugId = ""
         def deviceIP = ""
 		if (deviceModel == "HS107" || deviceModel == "HS300") {
@@ -757,15 +757,15 @@ def hubGetDevices() {
 
 def hubExtractDeviceData(response) {
 	def currentDevices =  parseJson(response.headers["cmd-response"])
-    if (currentDevices == []) {
-    	return
-    }
+    	if (currentDevices == []) {
+    		return
+    	}
 	state.devices = [:]
 	currentDevices.each {
 	    def appServerUrl = ""
         updateDevices(it.deviceMac, it.alias, it.deviceModel, it.plugId, it.deviceId, appServerUrl, it.deviceIP)
 	}
-    unschedule(createBridgeError)
+   	unschedule(createBridgeError)
 	state.currentError = null
 	sendEvent(name: "currentError", value: null)
 }
@@ -809,7 +809,7 @@ def addDevices() {
 	tpLinkModel << ["HS200" : "TP-Link Smart Switch"]					//	HS200
 	tpLinkModel << ["HS210" : "TP-Link Smart Switch"]					//	HS210
 	tpLinkModel << ["KP100" : "TP-Link Smart Plug"]						//	KP100
-	//	Miltiple Outlet Plug
+	//	Multiple Outlet Plug
 	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]				//	HS107
 	tpLinkModel << ["HS300" : "TP-Link Smart Multi-Plug"]				//	HS300
 	//	Dimming Switch Devices
@@ -832,19 +832,18 @@ def addDevices() {
 	tpLinkModel << ["KL130" : "TP-Link Smart Color Bulb"]				//	KL130
 	tpLinkModel << ["LB230" : "TP-Link Smart Color Bulb"]				//	LB230
 
-	def hub = location.hubs[0]
-	def hubId = hub.id
 	userSelectedDevicesAdd.each { dni ->
 		try {
 			def isChild = getChildDevice(dni)
 			if (!isChild) {
 				def device = state.devices.find { it.value.deviceNetworkId == dni }
 				def deviceModel = device.value.deviceModel.substring(0,5)
+                		def deviceNetworkID = device.value.deviceNetworkId
 				addChildDevice(
                 	"${appNamespace()}", 
                 	tpLinkModel["${deviceModel}"],
-                    device.value.deviceNetworkId,
-                    hubId, [
+                    "${deviceNetworkId}",
+                    null, [
                     	"label" : device.value.alias,
                     	"name" : deviceModel,
                     	"data" : [
@@ -902,6 +901,7 @@ def uninstManagerApp() {
 	try {
 		//Revokes TP-Link Auth Token
 		state.TpLinkToken = null
+        state.TpLinkClientUUID = null
 		state.currentError = null
 		state.errorCount = null
 		settingRemove("userName")
@@ -977,7 +977,7 @@ def initialize() {
 	if (installType == "Kasa Account"){
 		schedule("0 30 2 ? * WED", getToken)
 		runEvery5Minutes(checkError)
-    }
+    	}
     if (installType == "Node Applet") { runEvery10Minutes(hubGetDevices) }
 	runEvery3Hours(cleanStorage)
 	runEvery3Hours(checkForUpdates)
@@ -1298,8 +1298,6 @@ def developerPage() {
 			newDevices["${it.value.deviceNetworkId}"] = "${it.value.alias} model ${it.value.deviceModel}"
 		}
 	}
-	def hub = location.hubs[0]
-	def hubId = hub.id
 	def strLatestSmartAppVersion = textSmartAppVersion()
 	def strLatestDriverVersion = textDriverVersion()
 	def strLoadedDriverVersion = "Tunable White Bulb: ${atomicState?.devTWBVer}, Soft White Bulb: ${atomicState?.devSWBVer}, Color Bulb: ${atomicState?.devCBVer}, Plug: ${atomicState?.devPGVer}, Energy Monitor Plug: ${atomicState?.devEMPGVer}, Switch: ${atomicState?.devSHVer}, Dimming Switch: ${atomicState?.devDSHVer}"
@@ -1309,8 +1307,6 @@ def developerPage() {
 		}
 		section("Application Information: ", hideable: true, hidden: true) {
 			paragraph title: "TP-Link Token: ", "${state.TpLinkToken}", image: getAppImg("token.png")
-			paragraph title: "Hub: ", "${hub}", image: getAppImg("samsunghub.png")
-			paragraph title: "Hub ID: ", "${hubId}", image: getAppImg("samsunghub.png")
 			paragraph title: "Latest Smart Application Version: ", "${strLatestSmartAppVersion}", image: getAppImg("kasa.png")
 			paragraph title: "Latest Device Handlers Version: ", "${strLatestDriverVersion}", image: getAppImg("devices.png")
 			paragraph title: "Current Smart Application Version: ", "${appVersion()}", image: getAppImg("kasa.png")
@@ -1511,8 +1507,8 @@ def getWebData(params, desc, text=true) {
 
 def appInfoDesc()	{
 	def str = ""
-	str += "\n" + "• ${textVersion()}"
-	str += "\n" + "• ${textModified()}"
+	str += "\n" + " ${textVersion()}"
+	str += "\n" + " ${textModified()}"
 	return str
 }
 
@@ -1557,6 +1553,6 @@ def getAppImg(imgName) {
 	def linkWaypoint()	{ return "https://www.halowaypoint.com/en-us/spartan-companies/xkiller%20clan" }
 	def linkSteam()	{ return "https://steamcommunity.com/groups/xKillerClan" }
 	def linkFacebook()	{ return "https://www.facebook.com/groups/xKillerClan/" }
-	def textCopyright()	{ return "Copyright© 2018 - Dave Gutheinz, Anthony Ramirez" }
+	def textCopyright()	{ return "CopyrightÂ© 2018 - Dave Gutheinz, Anthony Ramirez" }
 	def textDesc()	{ return "A Service Manager for the TP-Link Kasa Devices connecting through the TP-Link Servers to SmartThings." }
 //end-of-file

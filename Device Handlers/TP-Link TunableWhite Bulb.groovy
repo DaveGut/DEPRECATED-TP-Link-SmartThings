@@ -28,8 +28,8 @@ TP-Link devices; primarily various users on GitHub.com.
 12.07.18	3.5.03.  Corrected error in Refresh rate.
 ======== DO NOT EDIT LINES BELOW ===*/
 //	===== Device Type Identifier =====
-	def deviceType()	{ return "Soft White Bulb" }
-//	def deviceType()	{ return "Tunable White Bulb" }
+//	def deviceType()	{ return "Soft White Bulb" }
+	def deviceType()	{ return "Tunable White Bulb" }
 //	def deviceType()	{ return "Color Bulb" }
 //	====== Device Namespace =====
 	def devNamespace()	{ return "davegut" }

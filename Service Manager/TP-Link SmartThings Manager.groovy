@@ -1,12 +1,10 @@
 /*
 TP-Link SmartThings Manager and TP-Link Cloud Connect, 2018 Version 3.5
-
 	Copyright 2018 Dave Gutheinz, Anthony Ramirez
     
 Licensed under the Apache License, Version 2.0 (the "License"); you
 may not use this file except in compliance with the License. You may
 obtain a copy of the License at:
-
 	http://www.apache.org/licenses/LICENSE-2.0
     
 Unless required by applicable law or agreed to in writing, software
@@ -14,17 +12,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License.
-
 Discalimer: This Service Manager and the associated Device
 Handlers are in no way sanctioned or supported by TP-Link. All
 development is based upon open-source data on the TP-Link Kasa Devices;
 primarily various users on GitHub.com.
-
 	===== CHANGES =====
-12-03-18	3.5.02.  Update to fix login problems and finalize
+12-03-18	3.5.02. Update to fix login problems and finalize
 			multi-plug integration.
-12.12.18	3.5.03.  Fixed error causing crash when installed multi-
+12.12.18	3.5.03. Fixed error causing crash when installed multi-
 			plug is offline and user attempts to add a device.
+01.12.19	3.5.04.	Added KP400 and KP200 to device list as multi-
+			plugs.
 */
 //	===== Developer Namespace =====
 	def appNamespace()	{ return "davegut" }
@@ -812,6 +810,8 @@ def addDevices() {
 	//	Miltiple Outlet Plug
 	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]				//	HS107
 	tpLinkModel << ["HS300" : "TP-Link Smart Multi-Plug"]				//	HS300
+	tpLinkModel << ["KP200" : "TP-Link Smart Multi-Plug"]				//	HS300
+	tpLinkModel << ["KP400" : "TP-Link Smart Multi-Plug"]				//	HS300
 	//	Dimming Switch Devices
 	tpLinkModel << ["HS220" : "TP-Link Smart Dimming Switch"]			//	HS220
 	//	Energy Monitor Plugs
@@ -1511,8 +1511,8 @@ def getWebData(params, desc, text=true) {
 
 def appInfoDesc()	{
 	def str = ""
-	str += "\n" + "• ${textVersion()}"
-	str += "\n" + "• ${textModified()}"
+	str += "\n" + "? ${textVersion()}"
+	str += "\n" + "? ${textModified()}"
 	return str
 }
 

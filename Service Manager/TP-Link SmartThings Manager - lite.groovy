@@ -31,7 +31,7 @@ primarily various users on GitHub.com.
 12-0302018	Updated to finalize multi-plug integration and
 			(attempt) to ease login issues.
 	====== Application Information ==========================*/
-	def textCopyright()	{ return "Copyright© 2018 - Dave Gutheinz, Anthony Ramirez" }
+	def textCopyright()	{ return "CopyrightÂ© 2018 - Dave Gutheinz, Anthony Ramirez" }
 	def appNamespace() { return "davegut" }
 	def appLabel() { return "TP-Link SmartThings Manager (lite)" }
 	def appVersion() { return "3.5.02" }
@@ -689,6 +689,8 @@ def addDevices() {
 	//	Miltiple Outlet Plug
 	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]				//	HS107
 	tpLinkModel << ["HS300" : "TP-Link Smart Multi-Plug"]				//	HS300
+	tpLinkModel << ["KP200" : "TP-Link Smart Multi-Plug"]				//	HS300
+	tpLinkModel << ["KP400" : "TP-Link Smart Multi-Plug"]				//	HS300
 	//	Dimming Switch Devices
 	tpLinkModel << ["HS220" : "TP-Link Smart Dimming Switch"]			//	HS220
 	//	Energy Monitor Plugs
@@ -909,5 +911,5 @@ def error() {return "https://s3.amazonaws.com/smartapp-icons/SafetyAndSecurity/A
 
 def appLogo() {return "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png"}
 
-def appInfoDesc() {return "• ${textVersion()}  \n\r• ${textModified()}"}
+def appInfoDesc() {return "Â• ${textVersion()}  \n\rÂ• ${textModified()}"}
 //end-of-file

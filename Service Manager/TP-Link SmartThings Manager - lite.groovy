@@ -31,7 +31,7 @@ primarily various users on GitHub.com.
 12-0302018	Updated to finalize multi-plug integration and
 			(attempt) to ease login issues.
 	====== Application Information ==========================*/
-	def textCopyright()	{ return "CopyrightÂ© 2018 - Dave Gutheinz, Anthony Ramirez" }
+	def textCopyright()	{ return "Copyright© 2018 - Dave Gutheinz, Anthony Ramirez" }
 	def appNamespace() { return "davegut" }
 	def appLabel() { return "TP-Link SmartThings Manager (lite)" }
 	def appVersion() { return "3.5.02" }
@@ -680,36 +680,36 @@ def updateDevices(deviceNetworkId, alias, deviceModel, plugId, deviceId, appServ
 def addDevices() {
 	def tpLinkModel = [:]
 	//	Plug-Switch Devices (no energy monitor capability)
-	tpLinkModel << ["HS100" : "TP-Link Smart Plug"]						//	HS100
-	tpLinkModel << ["HS103" : "TP-Link Smart Plug"]						//	HS103
-	tpLinkModel << ["HS105" : "TP-Link Smart Plug"]						//	HS105
-	tpLinkModel << ["HS200" : "TP-Link Smart Switch"]					//	HS200
-	tpLinkModel << ["HS210" : "TP-Link Smart Switch"]					//	HS210
-	tpLinkModel << ["KP100" : "TP-Link Smart Plug"]						//	KP100
+	tpLinkModel << ["HS100" : "TP-Link Smart Plug"]
+	tpLinkModel << ["HS103" : "TP-Link Smart Plug"]
+	tpLinkModel << ["HS105" : "TP-Link Smart Plug"]
+	tpLinkModel << ["HS200" : "TP-Link Smart Switch"]
+	tpLinkModel << ["HS210" : "TP-Link Smart Switch"]
+	tpLinkModel << ["KP100" : "TP-Link Smart Plug"]
 	//	Miltiple Outlet Plug
-	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]				//	HS107
-	tpLinkModel << ["HS300" : "TP-Link Smart Multi-Plug"]				//	HS300
-	tpLinkModel << ["KP200" : "TP-Link Smart Multi-Plug"]				//	HS300
-	tpLinkModel << ["KP400" : "TP-Link Smart Multi-Plug"]				//	HS300
+	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]
+	tpLinkModel << ["HS300" : "TP-Link Smart Multi-Plug"]
+	tpLinkModel << ["KP200" : "TP-Link Smart Multi-Plug"]
+	tpLinkModel << ["KP400" : "TP-Link Smart Multi-Plug"]
 	//	Dimming Switch Devices
-	tpLinkModel << ["HS220" : "TP-Link Smart Dimming Switch"]			//	HS220
+	tpLinkModel << ["HS220" : "TP-Link Smart Dimming Switch"]
 	//	Energy Monitor Plugs
-	tpLinkModel << ["HS110" : "TP-Link Smart Energy Monitor Plug"]		//	HS110
-	tpLinkModel << ["HS115" : "TP-Link Smart Energy Monitor Plug"]		//	HS110
+	tpLinkModel << ["HS110" : "TP-Link Smart Energy Monitor Plug"]
+	tpLinkModel << ["HS115" : "TP-Link Smart Energy Monitor Plug"]
 	//	Soft White Bulbs
-	tpLinkModel << ["KB100" : "TP-Link Smart Soft White Bulb"]			//	KB100
-	tpLinkModel << ["LB100" : "TP-Link Smart Soft White Bulb"]			//	LB100
-	tpLinkModel << ["LB110" : "TP-Link Smart Soft White Bulb"]			//	LB110
-	tpLinkModel << ["KL110" : "TP-Link Smart Soft White Bulb"]			//	KL110
-	tpLinkModel << ["LB200" : "TP-Link Smart Soft White Bulb"]			//	LB200
+	tpLinkModel << ["KB100" : "TP-Link Smart Soft White Bulb"]
+	tpLinkModel << ["LB100" : "TP-Link Smart Soft White Bulb"]
+	tpLinkModel << ["LB110" : "TP-Link Smart Soft White Bulb"]
+	tpLinkModel << ["KL110" : "TP-Link Smart Soft White Bulb"]
+	tpLinkModel << ["LB200" : "TP-Link Smart Soft White Bulb"]
 	//	Tunable White Bulbs
-	tpLinkModel << ["LB120" : "TP-Link Smart Tunable White Bulb"]		//	LB120
-	tpLinkModel << ["KL120" : "TP-Link Smart Tunable White Bulb"]		//	KL120
+	tpLinkModel << ["LB120" : "TP-Link Smart Tunable White Bulb"]
+	tpLinkModel << ["KL120" : "TP-Link Smart Tunable White Bulb"]
 	//	Color Bulbs
-	tpLinkModel << ["KB130" : "TP-Link Smart Color Bulb"]				//	KB130
-	tpLinkModel << ["LB130" : "TP-Link Smart Color Bulb"]				//	LB130
-	tpLinkModel << ["KL130" : "TP-Link Smart Color Bulb"]				//	KL130
-	tpLinkModel << ["LB230" : "TP-Link Smart Color Bulb"]				//	LB230
+	tpLinkModel << ["KB130" : "TP-Link Smart Color Bulb"]
+	tpLinkModel << ["LB130" : "TP-Link Smart Color Bulb"]
+	tpLinkModel << ["KL130" : "TP-Link Smart Color Bulb"]
+	tpLinkModel << ["LB230" : "TP-Link Smart Color Bulb"]
 
 	def hub = location.hubs[0]
 	def hubId = hub.id
@@ -911,5 +911,5 @@ def error() {return "https://s3.amazonaws.com/smartapp-icons/SafetyAndSecurity/A
 
 def appLogo() {return "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png"}
 
-def appInfoDesc() {return "Â• ${textVersion()}  \n\rÂ• ${textModified()}"}
+def appInfoDesc() {return "• ${textVersion()}  \n\r• ${textModified()}"}
 //end-of-file

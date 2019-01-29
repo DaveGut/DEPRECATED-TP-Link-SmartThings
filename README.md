@@ -9,17 +9,6 @@ b.  Node Applet.  Smart Application integration via a home wifi Node.JS bridge (
 
 c.  Manual Node Installation.  Traditional Hub installation.  Does not use a Smart Application.
 
-# Updates
-12-12-2018 - SmartApp 3.5.03.  Fixed SmartApp handling of HS107 and HS300.  After installed, if user unplugs (or is off-line) the device and subsequently tries to add a device, the SmartApp crashed.  Fix will not add the offending device to the currentDevices Array.  Impact:  User may not be able to remove the device using the SmartApp under certain circumstances.  Manual removal via classic Phone App or the IDE My Devices page will work.
-
-01.12.18 - App Version 3.5.04.  Added KP200 (two outlet wall switch) and KP400 (2-outlet outdoor plug) to devices using multi-plug.  Need user confirmation of effectiveness.
-
-12-12-2018 - Device Handlers 3.5.03.  Maintenance release to fix various minor problems; including issues in updating Refresh Rate from the Preferences section of the Smart App.
-
-11-24-2018 - Added device handler and updated Service Manager for HS107 (tested) and HS300.  Issue: Hub installation.  Deferred coding for obtaining the HS107/300 device label until later.  Not a simple issue.
-
-11-24-2018 - Updated node.js applet to eliminate error in device polling causing it to crash.
-
 # Installation Prequisites:
 
 A SmartThings Hub, IDE Account and SmartThings Classic are required for all original installations.  After installation, you may (if desired) transition to the new SmartThings phone app.
@@ -30,35 +19,30 @@ b.  Node Applet.  (1) Node.js Bridge, (2) Static IP address for Bridge (recommen
 
 c.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses for the bridge and all devices.
 
-# Installation Instructions
+# Installing the code into the IDE.
+    a.  Log onto the IDE and go to the "Locations" tab
+    b.  Select your Hub.  A new page will appear with details.
+    c.  Select the "My SmartApps" tab.
+    d.  Select "+New SmartApp" at the upper right corner.
+    e.  Select the "From Code" tab.
+    f.  In a separate window, go to the GitHub site "Service Manager" folder and open the appropriate service manager.
+    g.  Copy the contents of this file.  Assure you copy ALL of the contents.
+    h.  Returning to the IDE window, paste the code you copied into the code window.
+    i.  Select Create. [note, the paste process is a common error.  If you get a failure, try again. It is likely how you copied the data from GitHub.]
+    j.  Select "Publish" then "For Me".
+    k.  NOTE:  YOU WILL REPEAT THE BELOW FOR EACH DEVICE TYPE.  DEVICE TYPES versus DEVICE HANDLER files are at the end of these instruction.
+    l.  Go to the "My Device Handlers" tab.
+    m.  Select "+Create New Device Handler" from upper right of window.
+    n.  Select the "From Code" tab.
+    o.  In a separate window, go to the GitHub site "Device Handlers" folder and open the appropriate service manager.
+    p.  Copy the contents of this file.  Assure you copy ALL of the contents.
+    q.  Returning to the IDE window, paste the code you copied into the code window.
+    r.  Select Create.
+    s.  Select "Publish" then "For Me".
 
-(For interaction with the IDE, look in the SmartThings Community Forum.)
+# Running the SmartApp and Installing the Devices
 
-# Installation (Must use the SmartThings Classic App)
-Installation instruction can be found in the Documentation Folders.  These are step-by-step and are for users new to SmartThings.  However, they have not been modified from the previous version yet.
-
-a.  Install the relevant installation file(s):
-
-    Note:  If you have enabled GitHub integration in SmartThings, the repository settings are:
-            Owner: davegut
-            Name: SmartThingsPublic
-            Branch: master
-    
-    1.  Go to the MyDeviceHandler page on the IDE, select 'Create New Device Handler'  Select 'From Code'.
-    
-    2.  Copy the contents of the relevant file in the 'Device Handler' folder herein.  Paste into the IDE page.
-
-    3.  Select "Create".  Select 'Publish' 'For Me'.
-    
-    4.  For 'Kasa Account' or 'Node Applet' installations, go to the My SmartAps page on the IDE.  Select 'New SmartApp'.  Select 'From Code'.
-    
-    5.  Copy the contents of 'TP-Link SmartThings Manager.groovy' in the 'Service Manager' folder herein.  Paste into the IDE page.
-    
-    6.  Seleect 'Create'.  Select 'Publish' 'For Me'
-    
-    7.  For Node Applet installations, copy the new 'TP-LinkHub_v3.js' and (for PC) 'TP-LinkHub_v3.bat' files and install on your hub.
-    
-b.  Installation of 'Kasa Account' or 'Node Applet' integrations.
+The below MUST be accomplished using the Classic phone application.  If you do not understand what that is, check within the community.
 
     1.  From the SmartThings Classic phone app, select 'SmartApps', then 'Add a SmartApp'.  Select 'My Apps' at bottom of next page.  Select 'TP-Link SmartThings Manager' from the 'My Apps' page.
     
@@ -68,17 +52,49 @@ b.  Installation of 'Kasa Account' or 'Node Applet' integrations.
     
     4.  'Node Applet'. Assure the Node.js Applet is running.  Enter the device IP (example:  192.168.1.199) for your bridge.  You will see an error until the system has time to actually detect devices.  Then follow prompts to add devices.
 
-c.  Installation of Manual Node Installation
+# Device Handlers for each product.
+	tpLinkModel << ["HS100" : "TP-Link Plug-Switch"]
+	tpLinkModel << ["HS103" : "TP-Link Plug-Switch"]
+	tpLinkModel << ["HS105" : "TP-Link Plug-Switch"]
+	tpLinkModel << ["HS200" : "TP-Link Plug-Switch"]
+	tpLinkModel << ["HS210" : "TP-Link Plug-Switch"]
+	tpLinkModel << ["KP100" : "TP-Link Plug-Switch"]
+	//	Miltiple Outlet Plug
+	tpLinkModel << ["HS107" : "TP-Link Multi-Plug"]
+	tpLinkModel << ["HS300" : "TP-Link Multi-Plug"]
+	tpLinkModel << ["KP200" : "TP-Link Multi-Plug"]
+	tpLinkModel << ["KP400" : "TP-Link Multi-Plug"]
+	//	Dimming Switch Devices
+	tpLinkModel << ["HS220" : "TP-Link Dimming Switch"]
+	//	Energy Monitor Plugs
+	tpLinkModel << ["HS110" : "TP-Link Engr Mon Plug"]
+	tpLinkModel << ["HS115" : "TP-Link Engr Mon Plug"]
+	//	Soft White Bulbs
+	tpLinkModel << ["KB100" : "TP-Link Soft White Bulb"]
+	tpLinkModel << ["LB100" : "TP-Link Soft White Bulb"]
+	tpLinkModel << ["LB110" : "TP-Link Soft White Bulb"]
+	tpLinkModel << ["KL110" : "TP-Link Soft White Bulb"]
+	tpLinkModel << ["LB200" : "TP-Link Soft White Bulb"]
+	//	Tunable White Bulbs
+	tpLinkModel << ["LB120" : "TP-Link Tunable White Bulb"]
+	tpLinkModel << ["KL120" : "TP-Link Tunable White Bulb"]
+	//	Color Bulbs
+	tpLinkModel << ["KB130" : "TP-Link Color Bulb"]
+	tpLinkModel << ["LB130" : "TP-Link Color Bulb"]
+	tpLinkModel << ["KL130" : "TP-Link Color Bulb"]
+	tpLinkModel << ["LB230" : "TP-Link Color Bulb"]
 
-  1.  Start the Node.js Applet.  Go to the IDE, "My Devices'.  Select 'New Device'.
-  
-  2.  Fill-out the form fields 'Name', 'Label', 'Device Network ID'.
-  
-  3.  From the pull-down 'Type', select the appropriate device type (handler).  Select 'Location' (your hub).
-  
-  4.  In 'My devices or on the phone (Classic App) for each device, select preferences.  Enter the Bridge IP, and Device IP and save.
-  
-  5.  You can now use either phone app to control the device.  Prefernces can only be updated on the IDE or the classic app.
+
+# Updates
+12-12-2018 - SmartApp 3.5.03.  Fixed SmartApp handling of HS107 and HS300.  After installed, if user unplugs (or is off-line) the device and subsequently tries to add a device, the SmartApp crashed.  Fix will not add the offending device to the currentDevices Array.  Impact:  User may not be able to remove the device using the SmartApp under certain circumstances.  Manual removal via classic Phone App or the IDE My Devices page will work.
+
+01.12.18 - App Version 3.5.04.  Added KP200 (two outlet wall switch) and KP400 (2-outlet outdoor plug) to devices using multi-plug.  Need user confirmation of effectiveness.
+
+12-12-2018 - Device Handlers 3.5.03.  Maintenance release to fix various minor problems; including issues in updating Refresh Rate from the Preferences section of the Smart App.
+
+11-24-2018 - Added device handler and updated Service Manager for HS107 (tested) and HS300.  Issue: Hub installation.  Deferred coding for obtaining the HS107/300 device label until later.  Not a simple issue.
+
+11-24-2018 - Updated node.js applet to eliminate error in device polling causing it to crash.
 
 # Version 3.5 Update - 10/31/2018
 

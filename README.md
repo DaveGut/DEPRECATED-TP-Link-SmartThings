@@ -13,11 +13,10 @@ c.  Manual Node Installation.  Traditional Hub installation.  Does not use a Sma
 
 A SmartThings Hub, IDE Account and SmartThings Classic are required for all original installations.  After installation, you may (if desired) transition to the new SmartThings phone app.
 
-a.  Kasa Account.  (1) Kasa Account, (2) TP-Link devices in remote mode.
-
-b.  Node Applet.  (1) Node.js Bridge, (2) Static IP address for Bridge (recommended for all devices).
-
-c.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses for the bridge and all devices.
+    a.	# A SmartThing Hub
+    b.  Kasa Account.  (1) Kasa Account, (2) TP-Link devices in remote mode.
+    c.  Node Applet.  (1) Node.js Bridge, (2) Static IP address for Bridge (recommended for all devices).
+    d.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses for the bridge and all devices.
 
 # Installing the code into the IDE.
     a.  Log onto the IDE and go to the "Locations" tab
@@ -53,37 +52,35 @@ The below MUST be accomplished using the Classic phone application.  If you do n
     4.  'Node Applet'. Assure the Node.js Applet is running.  Enter the device IP (example:  192.168.1.199) for your bridge.  You will see an error until the system has time to actually detect devices.  Then follow prompts to add devices.
 
 # Device Handlers for each product.
-	tpLinkModel << ["HS100" : "TP-Link Plug-Switch"]
-	tpLinkModel << ["HS103" : "TP-Link Plug-Switch"]
-	tpLinkModel << ["HS105" : "TP-Link Plug-Switch"]
-	tpLinkModel << ["HS200" : "TP-Link Plug-Switch"]
-	tpLinkModel << ["HS210" : "TP-Link Plug-Switch"]
-	tpLinkModel << ["KP100" : "TP-Link Plug-Switch"]
+	"HS100" : "TP-Link Plug"
+	"HS103" : "TP-Link Plug"
+	"HS105" : "TP-Link Plug"
+	"HS200" : "TP-Link Switch"
+	"HS210" : "TP-Link Switch"
+	"KP100" : "TP-Link Plug"
 	//	Miltiple Outlet Plug
-	tpLinkModel << ["HS107" : "TP-Link Multi-Plug"]
-	tpLinkModel << ["HS300" : "TP-Link Multi-Plug"]
-	tpLinkModel << ["KP200" : "TP-Link Multi-Plug"]
-	tpLinkModel << ["KP400" : "TP-Link Multi-Plug"]
+	"HS107" : "TP-Link Multi-Plug"
+	"HS300" : "TP-Link Multi-Plug"
+	"KP200" : "TP-Link Multi-Plug"
+	"KP400" : "TP-Link Multi-Plug"
 	//	Dimming Switch Devices
-	tpLinkModel << ["HS220" : "TP-Link Dimming Switch"]
+	"HS220" : "TP-Link Dimming Switch"
 	//	Energy Monitor Plugs
-	tpLinkModel << ["HS110" : "TP-Link Engr Mon Plug"]
-	tpLinkModel << ["HS115" : "TP-Link Engr Mon Plug"]
+	"HS110" : "TP-Link Energy Monitor Plug"
 	//	Soft White Bulbs
-	tpLinkModel << ["KB100" : "TP-Link Soft White Bulb"]
-	tpLinkModel << ["LB100" : "TP-Link Soft White Bulb"]
-	tpLinkModel << ["LB110" : "TP-Link Soft White Bulb"]
-	tpLinkModel << ["KL110" : "TP-Link Soft White Bulb"]
-	tpLinkModel << ["LB200" : "TP-Link Soft White Bulb"]
+	"KB100" : "TP-Link Soft White Bulb"
+	"LB100" : "TP-Link Soft White Bulb"
+	"LB110" : "TP-Link Soft White Bulb"
+	"KL110" : "TP-Link Soft White Bulb"
+	"LB200" : "TP-Link Soft White Bulb"
 	//	Tunable White Bulbs
-	tpLinkModel << ["LB120" : "TP-Link Tunable White Bulb"]
-	tpLinkModel << ["KL120" : "TP-Link Tunable White Bulb"]
+	"LB120" : "TP-Link Tunable White Bulb"
+	"KL120" : "TP-Link Tunable White Bulb"
 	//	Color Bulbs
-	tpLinkModel << ["KB130" : "TP-Link Color Bulb"]
-	tpLinkModel << ["LB130" : "TP-Link Color Bulb"]
-	tpLinkModel << ["KL130" : "TP-Link Color Bulb"]
-	tpLinkModel << ["LB230" : "TP-Link Color Bulb"]
-
+	"KB130" : "TP-Link Color Bulb"
+	"LB130" : "TP-Link Color Bulb"
+	"KL130" : "TP-Link Color Bulb"
+	"LB230" : "TP-Link Color Bulb"
 
 # Updates
 12-12-2018 - SmartApp 3.5.03.  Fixed SmartApp handling of HS107 and HS300.  After installed, if user unplugs (or is off-line) the device and subsequently tries to add a device, the SmartApp crashed.  Fix will not add the offending device to the currentDevices Array.  Impact:  User may not be able to remove the device using the SmartApp under certain circumstances.  Manual removal via classic Phone App or the IDE My Devices page will work.

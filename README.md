@@ -13,10 +13,12 @@ c.  Manual Node Installation.  Traditional Hub installation.  Does not use a Sma
 
 A SmartThings Hub, IDE Account and SmartThings Classic are required for all original installations.  After installation, you may (if desired) transition to the new SmartThings phone app.
 
-    a.	# A SmartThing Hub
+    a.	A SmartThing Hub
     b.  Kasa Account.  (1) Kasa Account, (2) TP-Link devices in remote mode.
-    c.  Node Applet.  (1) Node.js Bridge, (2) Static IP address for Bridge (recommended for all devices).
-    d.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses for the bridge and all devices.
+    c.  Node Applet.  (1) Node.js Bridge, (2) Static IP address for Bridge 
+    	(recommended for all devices).
+    d.  Manual Node Installation.  (1)  Node.js Bridge, (2) Static IP addresses 
+    	for the bridge and all devices.
 
 # Installing the code into the IDE.
     a.  Log onto the IDE and go to the "Locations" tab
@@ -24,18 +26,23 @@ A SmartThings Hub, IDE Account and SmartThings Classic are required for all orig
     c.  Select the "My SmartApps" tab.
     d.  Select "+New SmartApp" at the upper right corner.
     e.  Select the "From Code" tab.
-    f.  In a separate window, go to the GitHub site "Service Manager" folder and open the appropriate service manager.
+    f.  In a separate window, go to the GitHub site "Service Manager" folder 
+    	and open the appropriate service manager.
     g.  Copy the contents of this file.  Assure you copy ALL of the contents.
-    h.  Returning to the IDE window, paste the code you copied into the code window.
-    i.  Select Create. [note, the paste process is a common error.  If you get a failure, try again. It is likely how you copied the data from GitHub.]
+    h.  Returning to the IDE window, paste the code you copied.
+    i.  Select Create. [note, the paste process is a common error.  If you 
+    	get a failure, try again. It is likely how you copied the data from 
+	GitHub.]
     j.  Select "Publish" then "For Me".
-    k.  NOTE:  YOU WILL REPEAT THE BELOW FOR EACH DEVICE TYPE.  DEVICE TYPES versus DEVICE HANDLER files are at the end of these instruction.
+    k.  NOTE:  YOU WILL REPEAT THE BELOW FOR EACH DEVICE TYPE.  DEVICE TYPES 
+    	versus DEVICE HANDLER files are at the end of these instruction.
     l.  Go to the "My Device Handlers" tab.
     m.  Select "+Create New Device Handler" from upper right of window.
     n.  Select the "From Code" tab.
-    o.  In a separate window, go to the GitHub site "Device Handlers" folder and open the appropriate service manager.
+    o.  In a separate window, go to the GitHub site "Device Handlers" folder 
+    	and open the appropriate service manager.
     p.  Copy the contents of this file.  Assure you copy ALL of the contents.
-    q.  Returning to the IDE window, paste the code you copied into the code window.
+    q.  Returning to the IDE window, paste the code you copied into.
     r.  Select Create.
     s.  Select "Publish" then "For Me".
 
@@ -43,13 +50,20 @@ A SmartThings Hub, IDE Account and SmartThings Classic are required for all orig
 
 The below MUST be accomplished using the Classic phone application.  If you do not understand what that is, check within the community.
 
-    1.  From the SmartThings Classic phone app, select 'SmartApps', then 'Add a SmartApp'.  Select 'My Apps' at bottom of next page.  Select 'TP-Link SmartThings Manager' from the 'My Apps' page.
-    
-    2.  'Select Installation Type'.  Tap for the selection of 'Kasa Account' or 'Node Applet'.  Once you select, the program will land on one of two pages
-    
-    3.  'Kasa Account'.  Enter your Username and Password.  Once both are entered (right or wrong), you will be directet to select in "Install a Device to Continue.  That will take you to the 'Device Installation Page.  Follow prompts to install the devices.
-    
-    4.  'Node Applet'. Assure the Node.js Applet is running.  Enter the device IP (example:  192.168.1.199) for your bridge.  You will see an error until the system has time to actually detect devices.  Then follow prompts to add devices.
+    1.  From the SmartThings Classic phone app, select 'SmartApps', then 
+    	'Add a SmartApp'.  Select 'My Apps' at bottom of next page.  Select 
+	'TP-Link SmartThings Manager' from the 'My Apps' page.
+    2.  'Select Installation Type'.  Tap for the selection of 'Kasa Account' 
+    	or 'Node Applet'.  Once you select, the program will land on one of 
+	Kasa Accounts or Node Applet page.
+    3.  'Kasa Account'.  Enter your Username and Password.  Once both are 
+    	entered (right or wrong), you will be directet to select in "Install 
+	a Device to Continue.  That will take you to the 'Device Installation 
+	Page.  Follow prompts to install the devices.
+     4.  'Node Applet'. Assure the Node.js Applet is running.  Enter the 
+     	device IP (example:  192.168.1.199) for your bridge.  You will see 
+	an error until the system has time to actually detect devices.  Then 
+	follow prompts to add devices.
 
 # Device Handlers for each product.
 	"HS100" : "TP-Link Plug"

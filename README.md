@@ -72,6 +72,8 @@ The below MUST be accomplished using the Classic phone application.  If you do n
 	"HS200" : "TP-Link Switch"
 	"HS210" : "TP-Link Switch"
 	"KP100" : "TP-Link Plug"
+	"RE270" " "TP-Link Plug"
+	"RE370" " "TP-Link Plug"
 	//	Miltiple Outlet Plug
 	"HS107" : "TP-Link Multi-Plug"
 	"HS300" : "TP-Link Multi-Plug"

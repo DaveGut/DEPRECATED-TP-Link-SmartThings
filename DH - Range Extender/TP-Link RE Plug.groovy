@@ -109,15 +109,6 @@ def refreshResponse(cmdResponse){
 		sendEvent(name: "switch", value: "off")
 		log.info "${device.label}: Power: off"
 	}
-/*
-{system={get_sysinfo={
-	err_code=0, 
-    plug={feature=TIM, 
-          relay_status=ON}, 
-*/
-}
-def parse(response) {
-log.error response
 }
 //	===== Send the Command =====
 private sendCmdtoServer(command, hubCommand, action) {
@@ -183,6 +174,20 @@ def hubResponseParse(response) {
 def setAppServerUrl(newAppServerUrl) {
 	updateDataValue("appServerUrl", newAppServerUrl)
 	log.info "${device.label}: Updated appServerUrl."
+}
+def setLightTransTime(newTransTime) {
+	switch (deviceType()) {
+		case "Soft White Bulb":
+		case "Tunable White Bulb":
+		case "Color Bulb":
+			def transitionTime = newTransTime.toInteger()
+			def transTime = 1000*transitionTime
+			updateDataValue("transTime", "${transTime}")
+			log.info "${device.label}: Light Transition Time for set to ${transTime} milliseconds."
+			break
+		default:
+			return
+	}
 }
 def setRefreshRate(refreshRate) {
 	updateDataValue("refreshRate", refreshRate)

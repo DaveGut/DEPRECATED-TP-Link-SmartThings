@@ -20,3 +20,5 @@ After installing the device using the Service Manager, the following will have t
     k.  Select "turn on" or "turn off"
     l.	Select the device and then "create Action"
     m.  Press Finish.
+    
+    

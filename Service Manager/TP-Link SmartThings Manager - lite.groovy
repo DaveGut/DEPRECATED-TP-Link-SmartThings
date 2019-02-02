@@ -361,8 +361,8 @@ def addDevices() {
 	tpLinkModel << ["HS210" : "TP-Link Smart Switch"]
 	tpLinkModel << ["KP100" : "TP-Link Smart Plug"]
 	//	WiFi Range Extender with smart plug.
-	tpLinkModel << ["RE270" : "TP-Link Smart Plug"]
-	tpLinkModel << ["RE370" : "TP-Link Smart Plug"]
+	tpLinkModel << ["RE270" : "TP-Link Smart RE Plug"]
+	tpLinkModel << ["RE370" : "TP-Link Smart RE Plug"]
 	//	Miltiple Outlet Plug
 	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]
 	tpLinkModel << ["HS300" : "TP-Link Smart Multi-Plug"]

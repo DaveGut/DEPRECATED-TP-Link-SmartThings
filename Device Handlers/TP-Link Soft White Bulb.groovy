@@ -20,22 +20,16 @@ All  development is based upon open-source data on the TP-Link devices; primaril
 ======== DO NOT EDIT LINES BELOW ===========================*/
 	def devVer()	{ return "4.0.01" }
 metadata {
-	definition (name: "TP-Link Smart Color Bulb",
+	definition (name: "TP-Link Smart Soft White Bulb",
     			namespace: "davegut",
                 author: "Dave Gutheinz, Anthony Ramirez",
                 ocfDeviceType: "oic.d.light",
-                mnmn: "SmartThings",
-                vid: "generic-rgbw-color-bulb") {
+                mnmn: "SmartThings", 
+                vid: "generic-dimmer") {
 		capability "Switch"
 		capability "Switch Level"
 		capability "refresh"
 		capability "Health Check"
-		capability "Color Temperature"
-		command "setModeNormal"
-		command "setModeCircadian"
-		attribute "circadianMode", "string"
-		capability "Color Control"
-		capability "Color Mode"
 	}
 	tiles(scale: 2) {
 		multiAttributeTile(name: "switch", type: "lighting", width: 6, height: 4, canChangeIcon: true){
@@ -55,26 +49,12 @@ metadata {
 			tileAttribute ("device.level", key: "SLIDER_CONTROL") {
 				attributeState "level", label: "Brightness: ${currentValue}", action: "switch level.setLevel"
 			}
-			tileAttribute ("device.color", key: "COLOR_CONTROL") {
-				attributeState "color", action: "setColor"
-			}
 		}
 		standardTile("refresh", "capability.refresh", width: 2, height: 1, decoration: "flat") {
 			state "default", label: "Refresh", action: "refresh.refresh"
 		}
-		controlTile("colorTempSliderControl", "device.colorTemperature", "slider", width: 2, height: 1, inactiveLabel: false,
-		range: "(2500..9000)") {
-			state "colorTemperature", action: "color temperature.setColorTemperature"
-		}
-		valueTile("colorTemp", "default", inactiveLabel: false, decoration: "flat", height: 1, width: 2) {
-			state "default", label: 'Color\n\rTemperature'
-		}
-		standardTile("circadianMode", "circadianMode", width: 2, height: 1, decoration: "flat") {
-			state "normal", label:'Circadian\n\rOFF', action: "setModeCircadian", nextState: "circadian"
-			state "circadian", label:'Circadian\n\rOn', action: "setModeNormal", nextState: "normal"
-		}
 		main("switch")
-		details("switch", "colorTemp", "circadianMode", "refresh", "colorTempSliderControl")
+		details("switch", "refresh")
 	}
     
     def refreshRate = [:]
@@ -161,44 +141,6 @@ def setLevel(percentage, rate) {
 	sendCmdtoServer("""{"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":{"ignore_default":1,"on_off":1,"brightness":${percentage},"transition_period":${rate}}}}""", "deviceCommand", "commandResponse")
 }
 
-def setColorTemperature(kelvin) {
-	if (kelvin == null) kelvin = state.lastColorTemp
-	if (kelvin < 2500) kelvin = 2500
-	if (kelvin > 9000) kelvin = 9000
-	kelvin = kelvin as int
-	sendCmdtoServer("""{"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":{"ignore_default":1,"on_off":1,"color_temp": ${kelvin},"hue":0,"saturation":0}}}""", "deviceCommand", "commandResponse")
-}
-
-def setModeNormal() {
-	sendCmdtoServer("""{"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":{"mode":"normal"}}}""", "deviceCommand", "commandResponse")
-}
-
-def setModeCircadian() {
-	sendCmdtoServer("""{"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":{"mode":"circadian"}}}""", "deviceCommand", "commandResponse")
-}
-
-def setHue(hue) {
-	if (hue == null) hue = state.lastHue
-	saturation = state.lastSaturation
-	setColor([hue: hue, saturation: saturation])
-}
-
-def setSaturation(saturation) {
-	if (saturation == null) saturation = state.lastSaturation
-	hue = state.lastHue
-	setColor([hue: hue, saturation: saturation])
-}
-
-def setColor(Map color) {
-	if (color == null) {
-		setColor([hue: state.lastHue, saturation: state.lastSaturation])
-		return
-	}
-	def hue = color.hue * 3.6 as int
-	def saturation = color.saturation as int
-	sendCmdtoServer("""{"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":{"ignore_default":1,"on_off":1,"color_temp":0,"hue":${hue},"saturation":${saturation}}}}""", "deviceCommand", "commandResponse")
-}
-
 def refresh(){
 	sendCmdtoServer('{"system":{"get_sysinfo":{}}}', "deviceCommand", "refreshResponse")
 }
@@ -217,27 +159,7 @@ def refreshResponse(status){
 	sendEvent(name: "switch", value: onOff)
 	def level = status.brightness
 	sendEvent(name: "level", value: level)
-	def circadianMode = status.mode
-	def color_temp = status.color_temp
-	def hue = status.hue as int
-	def saturation = status.saturation
-	def color = [:]
-	color << ["hue" : hue]
-	color << ["saturation" : saturation]
-	sendEvent(name: "circadianMode", value: circadianMode)
-	sendEvent(name: "colorTemperature", value: color_temp)
-	sendEvent(name: "hue", value: hue)
-	sendEvent(name: "saturation", value: saturation)
-	sendEvent(name: "color", value: color)
-	if (color_temp.toInteger() == 0) {
-		state.lastHue = scaledHue
-		state.lastSaturation = saturation
-		sendEvent(name: "colorMode", value: "color" ,descriptionText: descriptionText)
-	} else {
-		state.lastColorTemp = color_temp
-		sendEvent(name: "colorMode", value: "colorTemperature" ,descriptionText: descriptionText)
-	}
-	log.info "${device.label}: Power: ${onOff} / Brightness: ${level}% / Circadian Mode: ${circadianMode} / Color Temp: ${color_temp}K / Color: ${color}"
+	log.info "${device.label}: Power: ${onOff} / Brightness: ${level}%"
 }
 
 //	===== Send the Command =====

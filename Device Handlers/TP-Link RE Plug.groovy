@@ -58,15 +58,19 @@ metadata {
 	}
 }
 //	===== Update when installed or setting changed =====
+//	===== Update when installed or setting changed =====
 def installed() {
 	log.info "Installing ${device.label}..."
     updateDataValue("refreshRate", "30")
 	if(getDataValue("installType") == null) { updateDataValue("installType", "Manual") }
+	device.updateSetting("refreshRate",[type:"text", value:""])
     update()
 }
+
 def update() {
     runIn(2, updated)
 }
+
 def updated() {
 	log.info "Updating ${device.label}..."
 	unschedule()
@@ -74,8 +78,6 @@ def updated() {
     //	Capture legacy refresh rate data
 	if (refresh_Rate) { 
     	setRefreshRate(refresh_Rate)
-    } else if (refreshRate) {
-    	setRefreshRate(refreshRate)
     } else {
     	setRefreshRate(getDataValue("refreshRate"))
     }
@@ -86,6 +88,7 @@ def updated() {
     if (getDataValue("installType") == "Manual") { updateDataValue("deviceDriverVersion", devVer())  }
 	runIn(2, refresh)
 }
+
 def on() {
 	sendEvent(name: "switch", value: "on")
     runIn(3, refresh)

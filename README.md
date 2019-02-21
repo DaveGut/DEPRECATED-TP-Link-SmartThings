@@ -4,11 +4,11 @@
 # 2/21/2019 UPDATE
 A significant update to version 4.0.  No added device functionality, so upgrade is purely optional.  Changes:
 
-a.  Cleaned up device handlers to reduce code size and (very slightly) reduce execution cycles.
+I.  Cleaned up device handlers to reduce code size and (very slightly) reduce execution cycles.
 
-b.  Added a "upgrade installation" in the smart application to simplify the update process.  This new version is designed to upgrade from Versions 1, 2, 3, 3.5, and 3.6 and has been tested to do so.
+II.  Added a "upgrade installation" in the smart application to simplify the update process.  This new version is designed to upgrade from Versions 1, 2, 3, 3.5, and 3.6 and has been tested to do so.
 
-c.  Created documentation for installation and upgrade in the Documentation Folder:
+III.  Created documentation for installation and upgrade in the Documentation Folder:
     1.	"0 -Upgrade Installation.pdf"
     2.	"1 - Installing DH and SmartApp into SmartThings.pdf"
     3.	"2 - Running the Service Manager for the First Time.pdf"

@@ -9,18 +9,13 @@ I.  Cleaned up device handlers to reduce code size and (very slightly) reduce ex
 II.  Added a "upgrade installation" in the smart application to simplify the update process.  This new version is designed to upgrade from Versions 1, 2, 3, 3.5, and 3.6 and has been tested to do so.
 
 III.  Created documentation for installation and upgrade in the Documentation Folder:
+
     1.	"0 -Upgrade Installation.pdf"
-    
     2.	"1 - Installing DH and SmartApp into SmartThings.pdf"
-        
     3.	"2 - Running the Service Manager for the First Time.pdf"
-    
     4.	"3 -  Adding Kasa Devices.pdf"
-    
     5.	"4 -  Setting Kasa Device Preferences.pdf"
-    
     6.	"TP-Link SmartThing Implementation.pdf"
-    
     7.  "RE270_370 IFTTT Instructions.txt"
 
 There is only one version supporting three integrations:
@@ -50,6 +45,7 @@ A SmartThings Hub, IDE Account and SmartThings Classic are required for all orig
     
 # Upgrade from previous versions.
 See:  "0 -Upgrade Installation.pdf".
+
     a.  Replace the content of the device handlers and service manager in SmartThings  (NOTE: For the combined plug-switch device handler, use either the plug or the switch device handler.  They are the same except for an icon.)
     b.  Run the Service Manager and select Update Installation Data then "Save" in the right corner on the next page.
 

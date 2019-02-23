@@ -10,11 +10,11 @@ II.  Added a "upgrade installation" in the smart application to simplify the upd
 
 III.  Created documentation for installation and upgrade in the Documentation Folder:
 
-    1.	"0 -Upgrade Installation.pdf"
+    1.	"0 - Upgrade Installation.pdf"
     2.	"1 - Installing DH and SmartApp into SmartThings.pdf"
     3.	"2 - Running the Service Manager for the First Time.pdf"
-    4.	"3 -  Adding Kasa Devices.pdf"
-    5.	"4 -  Setting Kasa Device Preferences.pdf"
+    4.	"3 - Adding Kasa Devices.pdf"
+    5.	"4 - Setting Kasa Device Preferences.pdf"
     6.	"TP-Link SmartThing Implementation.pdf"
     7.  "RE270_370 IFTTT Instructions.txt"
 

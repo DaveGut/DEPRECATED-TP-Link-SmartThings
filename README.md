@@ -40,11 +40,11 @@ A SmartThings Hub, IDE Account and SmartThings Classic are required for all orig
 # Installation.
     a.  Install the code to your Smart Things IDE per: "1 - Installing DH and SmartApp into SmartThings.pdf".
     b.  Run the Service Manager for the first time per: "2 - Running the Service Manager for the First Time.pdf".
-    c.  Add your Kasa Devices per: "3 -  Adding Kasa Devices.pdf".
-    d.  OPTIONAL.  Set preferences for the devices per: "4 -  Setting Kasa Device Preferences.pdf".
+    c.  Add your Kasa Devices per: "3 - Adding Kasa Devices.pdf".
+    d.  OPTIONAL.  Set preferences for the devices per: "4 - Setting Kasa Device Preferences.pdf".
     
 # Upgrade from previous versions.
-See:  "0 -Upgrade Installation.pdf".
+See:  "0 - Upgrade Installation.pdf".
 
     a.  Replace the content of the device handlers and service manager in SmartThings  (NOTE: For the combined plug-switch device handler, use either the plug or the switch device handler.  They are the same except for an icon.)
     b.  Run the Service Manager and select Update Installation Data then "Save" in the right corner on the next page.

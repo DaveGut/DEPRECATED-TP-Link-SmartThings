@@ -15,10 +15,12 @@ language governing permissions and limitations under the License.
 Discalimer: This Service Manager and the associated Device Handlers are in no way sanctioned or supported by TP-Link. All
 development is based upon open-source data on the TP-Link Kasa Devices; primarily various users on GitHub.com.
 	====== Application History ================================
-02.28.19	4.0.01.	Update to version 4 of Service Manager.  Following are the goals:
-					a.	Reduced user options at each level.
-                    b.	More intuitive interface with appropriate in-line annotation giving.
-                    c.	Removal of external icons to preclude crashing of app in the new phone app.
+02.22.19	4.0.01.	Update to version 4 of Service Manager.  Following are the goals:
+			a.	Reduced user options at each level.
+			b.	More intuitive interface with appropriate in-line annotation giving.
+			c.	Removal of external icons to preclude crashing of app in the new phone app.
+02.24.19	4.0.02.	Fix code to eliminate periodic error on initial installation.  Genericised text to accommodate
+			differnces in IOS and Android interface.
 	====== Application Information ==========================*/
     def traceLogging() { return true }
 //	def traceLogging() { return false }
@@ -108,8 +110,7 @@ def welcomePage() {
 	if (installType == "Kasa Account") {
     	kasaGetDevices()
     } else {
-		hubCheck()
-    	runIn(5,hubGetDevices)
+	    hubSendCommand("hubCheck")
     }
 	app.deleteSetting("selectedAddDevices")
 	app.deleteSetting("selectedDeleteDevices")
@@ -176,7 +177,7 @@ def kasaAuthenticationPage() {
 		section("Enter Kasa Account Credentials: ") {
 			input ("userName", "email", title: "TP-Link Kasa Email Address", required: true, submitOnChange: true)
 			input ("userPassword", "text", title: "Kasa Account Password", required: true, submitOnChange: true)
-			paragraph "Select 'Save' at upper right corner to update your Kasa credentials."
+			paragraph "Select the text at upper right corner to update your Kasa credentials."
 			paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
@@ -195,14 +196,13 @@ def hubEnterIpPage() {
 		state.flowType = "updateNodeIp"
 		section("") {
 			input ("bridgeIp", "text", title: "Enter the Node.js Hub IP", required: true, multiple: false, submitOnChange: true)
-            paragraph "Select 'Save' at the upper right corner to update the IP."
+            paragraph "Select the text at the upper right corner to update the IP."
             paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
 }
 
 def addDevicesPage() {
-	traceLog("addDevicesPage: devices = ${state.devices}")
 	def devices = state.devices
 	def errorMsgDev = null
 	def newDevices = [:]
@@ -212,6 +212,7 @@ def addDevicesPage() {
 			newDevices["${it.value.deviceNetworkId}"] = "${it.value.alias} model ${it.value.deviceModel}"
 		}
 	}
+	traceLog("addDevicesPage: newDevices = ${newDevices}")
 	if (devices == [:]) {
 		errorMsgDev = "Looking for devices.  If this message persists, we have been unable to find " +
         "TP-Link devices on your wifi.  Check: 1) Hubitat Environment logs, 2) node.js logfile."
@@ -234,14 +235,13 @@ def addDevicesPage() {
 		}
   		section("Select Devices to Add (${newDevices.size() ?: 0} found)", hideable: true) {
 			input ("selectedAddDevices", "enum", required: true, multiple: true, submitOnChange: true, title: null, options: newDevices)
- 			paragraph "To add devices, select 'Save' at upper right corner."
+ 			paragraph "To add devices, select the text at upper right corner."
 			paragraph "Select  '<'  at upper left corner to exit."
         }
 	}
 }
 
 def devicePreferencesPage() {
-	traceLog("devicePreferencePage: devices = ${state.devices}")
 	def devices = state.devices
 	def oldDevices = [:]
 	devices.each {
@@ -250,6 +250,7 @@ def devicePreferencesPage() {
 			oldDevices["${it.value.deviceNetworkId}"] = "${it.value.alias} model ${it.value.deviceModel}"
 		}
 	}
+	traceLog("devicePreferencePage: devices = ${oldDevices}")
 
     def page1Text = ""
     page1Text += "Select Devices to Update.  Selecting this field will cause a window with the"
@@ -288,7 +289,7 @@ def devicePreferencesPage() {
                                    "10" : "Refresh every 10 minutes", 
                                    "15" : "Refresh every 15 minutes",
                                    "30" : "Refresh every 30 minutes"]])
-			paragraph "To update preferences, select 'Save' at upper right corner."
+			paragraph "To update preferences, select the text at upper right corner."
 			paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
@@ -307,7 +308,7 @@ def updateInstallDataPage() {
             paragraph page1Text
 		}
 		section("") {
-            paragraph "Select 'Save' at the upper right corner to update the Installation Data."
+            paragraph "Select the text at the upper right corner to update the Installation Data."
             paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
@@ -317,7 +318,7 @@ def flowDirector() {
 	traceLog("flowDirector ${state.flowType}")
 	switch(state.flowType) {
 		case "updateNodeIp":
-            hubGetDevices()
+		    hubSendCommand("pollForDevices")
 			break
 		case "updateKasaToken":
 	        getToken()
@@ -326,7 +327,6 @@ def flowDirector() {
         	updateInstallData()
             break
         default:
-        	welcomePage()
         	break
     }
 	state.flowType = "default"
@@ -641,13 +641,7 @@ def sendDeviceCmd(appServerUrl, deviceId, command) {
 
 //	===== Node Applet Methods ============
 def hubGetDevices() {
-	traceLog("pollForDevices")
     hubSendCommand("pollForDevices")
-}
-
-def hubCheck() {
-	traceLog("hubCheck")
-    hubSendCommand("hubCheck")
 }
 
 def hubSendCommand(action) {
@@ -666,6 +660,7 @@ def hubExtractData(response) {
 	def action = response.headers["action"]
     if (action == "hubCheck") {
 	    state.hubVersion = response.headers["cmd-response"]
+	    hubSendCommand("pollForDevices")
     } else {
 		def currentDevices =  parseJson(response.headers["cmd-response"])
 	    if (currentDevices == []) {

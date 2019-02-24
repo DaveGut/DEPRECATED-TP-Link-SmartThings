@@ -1,6 +1,10 @@
 # TP-Link / Kasa Smart Home Device SmartThings Integration
 (Note:  The previous version is still available in the directory "Old Version")
 
+# Current Versions:
+1.  Service Manager: 4.0.02
+2.  Device Handler: 4.0.01
+
 # 2/21/2019 UPDATE
 A significant update to version 4.0.  No added device functionality, so upgrade is purely optional.  Changes:
 

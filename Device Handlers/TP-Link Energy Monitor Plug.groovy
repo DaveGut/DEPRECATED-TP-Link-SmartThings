@@ -17,6 +17,7 @@ All  development is based upon open-source data on the TP-Link devices; primaril
 ===== History ================================================
 02.28.19	4.0.01	Update to production version - single file per device type.
 					Updated Service Manager to Device communications.
+03.09.19	4.0.02	Added scheduling of EM events.
 ======== DO NOT EDIT LINES BELOW ===========================*/
 	def devVer()	{ return "4.0.01" }
 metadata {
@@ -135,7 +136,12 @@ def updated() {
     if (gateway_IP) { updateDataValue("gatewayIP", gateway_IP) }
 	sendEvent(name: "DeviceWatch-Enroll", value: groovy.json.JsonOutput.toJson(["protocol":"cloud", "scheme":"untracked"]), displayed: false)
     if (getDataValue("installType") == "Manual") { updateDataValue("deviceDriverVersion", devVer())  }
+    
+	schedule("0 05 0 * * ?", setCurrentDate)
+	schedule("0 10 0 * * ?", getEnergyStats)
+	setCurrentDate()
 	runIn(2, refresh)
+	runIn(7, getEnergyStats)
 }
 
 //	===== Basic Plug Control/Status =====

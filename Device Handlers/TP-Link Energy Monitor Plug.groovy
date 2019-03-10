@@ -19,7 +19,7 @@ All  development is based upon open-source data on the TP-Link devices; primaril
 					Updated Service Manager to Device communications.
 03.09.19	4.0.02	Added scheduling of EM events.
 ======== DO NOT EDIT LINES BELOW ===========================*/
-	def devVer()	{ return "4.0.01" }
+	def devVer()	{ return "4.0.01TEST" }
 metadata {
 	definition (name: "TP-Link Smart Energy Monitor Plug",
 				namespace: "davegut",

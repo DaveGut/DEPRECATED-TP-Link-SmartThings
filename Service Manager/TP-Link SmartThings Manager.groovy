@@ -21,10 +21,11 @@ development is based upon open-source data on the TP-Link Kasa Devices; primaril
 			c.	Removal of external icons to preclude crashing of app in the new phone app.
 02.24.19	4.0.02.	Fix code to eliminate periodic error on initial installation.  Genericised text to accommodate
 			differnces in IOS and Android interface.
+03.17.19	4.0.03.	Modified User Interface to address IOS problem where the user sometimes does not see the "save".
 	====== Application Information ==========================*/
     def traceLogging() { return true }
 //	def traceLogging() { return false }
-	def appVersion() { return "4.0.01" }
+	def appVersion() { return "4.0.03" }
 	def driverVersion() { return "4.0" }
     def hubVersion() { return "4.0" }
 //	===========================================================
@@ -48,17 +49,16 @@ preferences {
 	page(name: "kasaAuthenticationPage")
     page(name: "addDevicesPage")
 	page(name: "devicePreferencesPage")
-	page(name: "updateInstallDataPage")
-	page(name: "flowDirector")
+	page(name: "updateInstallPage")
 }
 
 def setInitialStates() {
-	if (!state.TpLinkToken) { state.TpLinkToken = null }
-	if (!state.devices) { state.devices = [:] }
 	if (!state.currentError) { state.currentError = null }
 	if (!state.errorCount) { state.errorCount = 0 }
-    if (!state.hubVersion) { state.hubVersion = null }
-	state.flowType = "default"
+	app.deleteSetting("selectedAddDevices")
+	app.deleteSetting("selectedUpdateDevices")
+	app.deleteSetting("userLightTransTime")
+	app.deleteSetting("userRefreshRate")
 }
 
 //	===== Pages =====================
@@ -66,23 +66,19 @@ def startPage() {
 	traceLog("startPage: installType = ${installType}")
 	setInitialStates()
 	if (installType) {
-		if (installType == "Kasa Account" && !userName) {
-			return kasaAuthenticationPage()       	
-		} else if (installType == "Node Applet" && !bridgeIp) {
-			return hubEnterIpPage()
-        } else {
-        	return welcomePage()
-        }
+		if (installType == "Kasa Account" && !userName) { return kasaAuthenticationPage() }
+        else if (installType == "Node Applet" && !bridgeIp) { return hubEnterIpPage() }
+        else { return welcomePage() }
 	}
 
     def page1Text = ""
     page1Text += "This Service Manager supports either a Kasa Account or Node Applet installation:"
     page1Text += "\na.  Kasa Account: Kasa cloud based integration."
     page1Text += "\nb.  Node Applet: node.js applet based integration."
-    page1Text += "\nAfter selecting the installation type, the SM will transition to either the Kasa Login "
-    page1Text += "or the enter hub IP page."
 
-	return dynamicPage (name: "startPage", title: "Select Installation Type", uninstall: true) {
+	return dynamicPage (name: "startPage", 
+    					title: "Select Installation Type", 
+                        uninstall: true) {
 		errorSection()
  		section("Instructions - select  '+'  to expand", hideable: true, hidden: true) {
             paragraph page1Text
@@ -90,15 +86,12 @@ def startPage() {
 		section("") {
 			input ("installType", "enum", 
             	title: "Select Installation Type", 
-                required: true, 
+                required: true,
                 multiple: false,
                 submitOnChange: true,
 				options: ["Kasa Account", "Node Applet"])
-            if (installType == "Kasa Account") {
-            	return kasaAuthenticationPage()
-            } else if (installType == "Node Applet") {
-            	return hubEnterIpPage()
-            }
+            if (installType == "Kasa Account") { return kasaAuthenticationPage() }
+            else if (installType == "Node Applet") { return hubEnterIpPage() }
 			paragraph "Select  '<'  at upper left corner to exit."
             paragraph "Select 'Remove' to remove application."
  		}
@@ -107,17 +100,10 @@ def startPage() {
 
 def welcomePage() {
 	traceLog("welcomePage: installType = ${installType}")
-	if (installType == "Kasa Account") {
-    	kasaGetDevices()
-    } else {
-	    hubSendCommand("hubCheck")
-    }
-	app.deleteSetting("selectedAddDevices")
-	app.deleteSetting("selectedDeleteDevices")
-	app.deleteSetting("selectedUpdateDevices")
-	app.deleteSetting("userLightTransTime")
-	app.deleteSetting("userRefreshRate")
-    
+    flowDirector()
+	if (installType == "Kasa Account") { kasaGetDevices() }
+    else { hubSendCommand("pollForDevices") }
+
     def page1Text = ""
     page1Text += "Various options are available:"
     page1Text += "\na. ADD DEVICES. Select devices to add and install into ST."
@@ -132,7 +118,9 @@ def welcomePage() {
     page1Text += "\n\nd. UPDATE INSTALLATION DATA.  For upgrade installations, updates the legacy device "
     page1Text += "data tothe new data paradigm, insuring the device will work properly."
 
-	return dynamicPage (name: "welcomePage", title: "Kasa Device Management Page", uninstall: true) {
+	return dynamicPage (name: "welcomePage", 
+    					title: "Kasa Device Management Page",
+                        uninstall: true) {
 		errorSection()
  		section("Instructions - select  '+'  to expand", hideable: true, hidden: true) {
             paragraph page1Text
@@ -153,56 +141,68 @@ def welcomePage() {
 			}
         }
  		section("Update Installation Data", hideable: true, hidden: true) {
-            href "updateInstallDataPage", title: "Update Installation Data", description: "Update data during upgrade process"
+			href "updateInstallPage", title: "Update Installation Data", description: "Go to Update Install Data"
 		}
+
         section() {
-			paragraph "Select  '<'  at upper left corner to exit.\nSelect 'Remove' to remove application and all Kasa devices."
+			paragraph "Select  '<'  at upper left corner to exit."
+            paragraph "Select 'Remove' to remove application."
         }
 	}
 }
 
 def kasaAuthenticationPage() {
-    def page1Text = ""
-    page1Text += "Enter you Kasa Account username and password below.  Select 'Save' at upper right hand corner.  "
-    page1Text += "\nThe program will log into you Kasa account, capture the token for further interaction, and "
-    page1Text += "install itself into SmartThings.  It will then exit.  \n\nTo continue adding devices or setting "
-    page1Text += "prefences, open the app again."
+	traceLog("kasaAuthenticationPage")
 
-	return dynamicPage (name: "kasaAuthenticationPage", title: "Initial Kasa Login Page", install: true) {
+	return dynamicPage (name: "kasaAuthenticationPage", 
+    					title: "Initial Kasa Login Page",
+                        install: true) {
         errorSection()
- 		section("Instructions - select  '+'  to expand", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
-		state.flowType = "updateKasaToken"
 		section("Enter Kasa Account Credentials: ") {
-			input ("userName", "email", title: "TP-Link Kasa Email Address", required: true, submitOnChange: true)
-			input ("userPassword", "text", title: "Kasa Account Password", required: true, submitOnChange: true)
-			paragraph "Select the text at upper right corner to update your Kasa credentials."
+			input ("userName", "email", 
+            		title: "TP-Link Kasa Email Address", 
+                    required: true, 
+                    submitOnChange: true)
+			input ("userPassword", "password", 
+            		title: "TP-Link Kasa Account Password", 
+                    required: true, 
+                    submitOnChange: true)
+			if (userName != null && userPassword != null) {
+				state.flowType = "updateKasaToken"
+				href "welcomePage", title: "Get or Update Kasa Token", description: "Tap to Get Kasa Token"
+            }
 			paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
 }
 
 def hubEnterIpPage() {
-    def page1Text = ""
-    page1Text += "Enter the IP address of your node.js Hub.  IP format is NNN.NNN.NNN.NNN. Select 'Save' at upper "
-    page1Text += "right hand corner.\nThe program set the Hup IP, capture device data and install itself into "
-    page1Text += "SmartThings. It will then exit.  \n\nTo continue adding devices or setting prefences, open the app again."
-	return dynamicPage (name: "hubEnterIpPage", title: "Set/Update Node IP", install: true) {
+	traceLog("hubEnterIpPage")
+
+	return dynamicPage (name: "hubEnterIpPage", 
+    					title: "Set/Update Node IP",
+                        install: true) {
         errorSection()
- 		section("Instructions - select  '+'  to expand", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
-		state.flowType = "updateNodeIp"
 		section("") {
-			input ("bridgeIp", "text", title: "Enter the Node.js Hub IP", required: true, multiple: false, submitOnChange: true)
-            paragraph "Select the text at the upper right corner to update the IP."
+			input ("bridgeIp", "text", 
+            		title: "Enter the Node.js Hub IP", 
+                    required: true, 
+                    multiple: false, 
+                    submitOnChange: true)
+			if (bridgeIp) {
+ 				state.flowType = "updateNodeIp"
+                	href "welcomePage", title: "Confirm Hub IP", description: "Tap to confirm Hub IP"
+            }
             paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
 }
 
 def addDevicesPage() {
+	traceLog("addDevicesPage, installType = ${installType}")
+	if (installType == "Node Applet") { hubSendCommand("hubCheck") }
+	else { kasaGetDevices() }
+
 	def devices = state.devices
 	def errorMsgDev = null
 	def newDevices = [:]
@@ -212,36 +212,38 @@ def addDevicesPage() {
 			newDevices["${it.value.deviceNetworkId}"] = "${it.value.alias} model ${it.value.deviceModel}"
 		}
 	}
-	traceLog("addDevicesPage: newDevices = ${newDevices}")
 	if (devices == [:]) {
 		errorMsgDev = "Looking for devices.  If this message persists, we have been unable to find " +
         "TP-Link devices on your wifi.  Check: 1) Hubitat Environment logs, 2) node.js logfile."
 	} else if (newDevices == [:]) {
 		errorMsgDev = "No new devices to add. Are you sure they are in Remote Control Mode?"
 	}
+    state.flowType = "addSelectedDevices"
 
-    def page1Text = ""
-    page1Text += "The manager has scanned your system for Kasa devices and removed already installed devices."
-    page1Text += "The not installed devices are linked to the field below.  If there are none, then none were found."
-    page1Text += "\na. Select the field below."
-    page1Text += "\nb. Select the devices to add from the list."
-    page1Text += "\nc. Select 'Done' in upper right."
-    page1Text += "\nd. Select 'Save' in upper right to install the devices"
-
-	return dynamicPage (name: "addDevicesPage", title: "Add Kasa Devices", install: true) {
+	return dynamicPage (name: "addDevicesPage", 
+    					title: "Add Kasa Devices", 
+                        refreshInterval: 15, 
+                        install: true) {
         errorSection()
- 		section("Instructions - select  '+'  to expand", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
-  		section("Select Devices to Add (${newDevices.size() ?: 0} found)", hideable: true) {
-			input ("selectedAddDevices", "enum", required: true, multiple: true, submitOnChange: true, title: null, options: newDevices)
- 			paragraph "To add devices, select the text at upper right corner."
+  		section("Select Devices to Add (${newDevices.size() ?: 0} found)") {
+			input ("selectedAddDevices", "enum", 
+            		required: true, 
+                    multiple: true, 
+                    submitOnChange: true, 
+                    title: null, 
+                    options: newDevices)
+			if (selectedAddDevices) {
+				paragraph "Select text at upper right to install selected devices.\n\r"
+            }
+            paragraph
 			paragraph "Select  '<'  at upper left corner to exit."
         }
 	}
 }
 
 def devicePreferencesPage() {
+	traceLog("devicePreferencesPage")
+    
 	def devices = state.devices
 	def oldDevices = [:]
 	devices.each {
@@ -250,23 +252,12 @@ def devicePreferencesPage() {
 			oldDevices["${it.value.deviceNetworkId}"] = "${it.value.alias} model ${it.value.deviceModel}"
 		}
 	}
-	traceLog("devicePreferencePage: devices = ${oldDevices}")
+	state.flowType = "updateDevicePreferences"
 
-    def page1Text = ""
-    page1Text += "Select Devices to Update.  Selecting this field will cause a window with the"
-    page1Text += "installed devices.  Select the devices for prefrence update and select 'Done'."
-    page1Text += "\nYou must select at least one option to update."
-    page1Text += "\na.  Lighting Transition Time.  Select the value from the pull-down.  This is "
-    page1Text += "for BULBS and will be ignored for plugs and switches."
-    page1Text += "\nb.  Device Refresh Rate.  Actually the minutes between refresh cycles.  It is "
-    page1Text += "not recommended to change the default here unless you need to."
-    page1Text += "\nc.  When done selecting and setting parameters, select 'Save'."
-
-	return dynamicPage (name: "devicePreferencesPage", title: "Device Preferences Page", install: true) {
+	return dynamicPage (name: "devicePreferencesPage", 
+    					title: "Device Preferences Page",
+                        install: true) {
         errorSection()
- 		section("Instructions - select  '+'  to expand", hideable: true, hidden: true) {
-            paragraph page1Text
-		}
 		section("Device Configuration: ") {
 			input ("selectedUpdateDevices", "enum",
             	required: true,
@@ -289,47 +280,50 @@ def devicePreferencesPage() {
                                    "10" : "Refresh every 10 minutes", 
                                    "15" : "Refresh every 15 minutes",
                                    "30" : "Refresh every 30 minutes"]])
-			paragraph "To update preferences, select the text at upper right corner."
+			if (selectedUpdateDevices) {
+				paragraph "Select text at upper right to update preferences for selected devices.\n\r"
+            }
 			paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
 }
 
-def updateInstallDataPage() {
-    def page1Text = ""
-    page1Text += "This page is used to update the installation data.  NO input is required.  Then intention is "
-	page1Text += "for this update to occur on initial installation only for upgrades."
-    page1Text += "\n\nTo update the Installation Data, select 'Save' in the upper right."
-     
-	state.flowType = "updateInstallData"
-	return dynamicPage (name: "updateInstallDataPage", title: "Initial Install Update Device Data", install: true) {
+def updateInstallPage() {
+	traceLog("updateInstallPage")
+
+	return dynamicPage (name: "updateInstallPage", 
+    					title: "Update Installation Data during UPGRADE",
+                        install: true) {
         errorSection()
- 		section("Instructions", hideable: true, hidden: false) {
-            paragraph page1Text
-		}
-		section("") {
-            paragraph "Select the text at the upper right corner to update the Installation Data."
+ 		section("Update Installation Data", hideable: true) {
+			state.flowType = "updateInstallData"
+				paragraph "Select text at upper right update device data from previous version.\n\r"
             paragraph "Select  '<'  at upper left corner to exit."
 		}
 	}
 }
 
 def flowDirector() {
-	traceLog("flowDirector ${state.flowType}")
+	traceLog("flowDirector flowType = ${state.flowType}")
 	switch(state.flowType) {
 		case "updateNodeIp":
-		    hubSendCommand("pollForDevices")
+		    hubSendCommand("hubCheck")
 			break
 		case "updateKasaToken":
 	        getToken()
 			break
+        case "addSelectedDevices":
+        	addDevices()
+            break
         case "updateInstallData":
         	updateInstallData()
+            break
+        case "updateDevicePreferences":
+        	updatePreferences()
             break
         default:
         	break
     }
-	state.flowType = "default"
 }
 
 def errorSection() {
@@ -372,6 +366,7 @@ def updateDevices(deviceNetworkId, alias, deviceModel, plugId, deviceId, appServ
 
 def addDevices() {
 	traceLog("addDevices ${selectedAddDevices}")
+    state.flowType = null
 	def tpLinkModel = [:]
 	//	Plug-Switch Devices (no energy monitor capability)
 	tpLinkModel << ["HS100" : "TP-Link Smart Plug"]
@@ -452,10 +447,12 @@ def addDevices() {
 			log.debug "Error Adding ${deviceModel} ${device.value.alias}: ${e}"
 		}
 	}
+    app.deleteSetting("selectedAddDevices")
 }
 
 def updatePreferences() {
 	traceLog("updatePreferences ${selectedUpdateDevices}, ${userLightTransTime}, ${userRefreshRate}")
+    state.flowType = null
 	selectedUpdateDevices.each {
 		def child = getChildDevice(it)
         if (userLightTransTime) {
@@ -474,11 +471,14 @@ def updatePreferences() {
         if (userRefreshRate) { child.setRefreshRate(userRefreshRate) }
 		log.info "Kasa device ${child} preferences updated"
 	}
+	app.deleteSetting("selectedUpdateDevices")
+	app.deleteSetting("userLightTransTime")
+	app.deleteSetting("userRefreshRate")
 }
 
 def updateInstallData() {
 	traceLog("updateInstallData")
-	state.flowType = "default"
+	state.flowType = null
 	def devices = state.devices
 	devices.each {
 		def child = getChildDevice(it.value.deviceNetworkId)
@@ -500,7 +500,8 @@ def updateInstallData() {
 
 //	===== Kasa Account Methods ===========
 def getToken() {
-	traceLog("getToken ${userName}, ${userPassword}")
+	traceLog("getToken ${userName}")
+    state.flowType = null
 	def hub = location.hubs[0]
 	def cmdBody = [
 		method: "login",
@@ -655,12 +656,12 @@ def hubSendCommand(action) {
 }
 
 def hubExtractData(response) {
-	traceLog("hubExtractData")
     unschedule(createBridgeError)
 	def action = response.headers["action"]
+	traceLog("hubExtractData, action = ${action}")
     if (action == "hubCheck") {
+    	state.flowType = null
 	    state.hubVersion = response.headers["cmd-response"]
-	    hubSendCommand("pollForDevices")
     } else {
 		def currentDevices =  parseJson(response.headers["cmd-response"])
 	    if (currentDevices == []) {
@@ -724,22 +725,18 @@ def installed() { initialize() }
 def updated() { initialize() }
 
 def initialize() {
-	traceLog("initialize ${state.flowType}")
+	traceLog("initialize")
 	unsubscribe()
 	unschedule()
 	if (installType == "Kasa Account"){
 		schedule("0 30 2 ? * WED", getToken)
 		runEvery5Minutes(checkError)
-    } else if (installType == "Node Applet") { runEvery15Minutes(hubGetDevices) }
-	if (selectedAddDevices) {
-    	addDevices()
-    } else if (selectedDeleteDevices) {
-    	removeDevices()
-    } else if (selectedUpdateDevices) {
-    	updatePreferences()
-    } else {
-    	flowDirector()
+    } else if (installType == "Node Applet") {
+    	runEvery15Minutes(hubGetDevices)
     }
+	if (selectedAddDevices) { addDevices() }
+    else if (selectedUpdateDevices) { updatePreferences() }
+    else { flowDirector() }
 }
 
 def uninstalled() { }

@@ -2,7 +2,7 @@
 (Note:  The previous version is still available in the directory "Old Version")
 
 # Current Versions:
-1.  Service Manager: 4.0.02
+1.  Service Manager: 4.0.04
 2.  Device Handler: 4.0.01
 
 # 2/21/2019 UPDATE

@@ -22,10 +22,11 @@ development is based upon open-source data on the TP-Link Kasa Devices; primaril
 02.24.19	4.0.02.	Fix code to eliminate periodic error on initial installation.  Genericised text to accommodate
 			differnces in IOS and Android interface.
 03.17.19	4.0.03.	Modified User Interface to address IOS problem where the user sometimes does not see the "save".
+04.06.10	4.0.04.	Added KP200 and KP400 to installation.
 	====== Application Information ==========================*/
     def traceLogging() { return true }
 //	def traceLogging() { return false }
-	def appVersion() { return "4.0.03" }
+	def appVersion() { return "4.0.04" }
 	def driverVersion() { return "4.0" }
     def hubVersion() { return "4.0" }
 //	===========================================================
@@ -573,7 +574,7 @@ def kasaGetDevices() {
 		def deviceModel = it.deviceModel.substring(0,5)
         def plugId = ""
         def deviceIP = ""
-		if (deviceModel == "HS107" || deviceModel == "HS300") {
+		if (deviceModel == "HS107" || deviceModel == "HS300" || deviceModel == "KP200" || deviceModel == "KP400") {
 			def totalPlugs = 2
 			if (deviceModel == "HS300") {
 				totalPlugs = 6

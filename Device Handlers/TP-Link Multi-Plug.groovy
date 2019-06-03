@@ -17,8 +17,9 @@ All  development is based upon open-source data on the TP-Link devices; primaril
 ===== History ================================================
 02.28.19	4.0.01	Update to production version - single file per device type.
 					Updated Service Manager to Device communications.
+06.02.19	4.0.02	Fixed problem where action tiles did not detect state change.
 ======== DO NOT EDIT LINES BELOW ===========================*/
-	def devVer()	{ return "4.0.01" }
+	def devVer()	{ return "4.0.02" }
 metadata {
 	definition (name: "TP-Link Smart Multi-Plug", 
     			namespace: "davegut", 
@@ -132,17 +133,16 @@ def refresh(){
 def refreshResponse(cmdResponse){
 	def children = cmdResponse.system.get_sysinfo.children
 	def plugId = getDataValue("plugId")
+    def switchState = "off"
 	children.each {
 		if (it.id == plugId) {
 			if (it.state == 1) {
-				sendEvent(name: "switch", value: "on")
-				log.info "${device.label}: Power: on"
-			} else {
-				sendEvent(name: "switch", value: "off")
-				log.info "${device.label}: Power: off"
+            	switchState = "on"
 			}
 		}
 	}
+	sendEvent(name: "switch", value: "${switchState}")
+	log.info "${device.label}: Power: ${switchState}"
 }
 
 //	===== Send the Command =====

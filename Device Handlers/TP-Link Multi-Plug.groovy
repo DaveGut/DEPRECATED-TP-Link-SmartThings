@@ -133,12 +133,14 @@ def refresh(){
 def refreshResponse(cmdResponse){
 	def children = cmdResponse.system.get_sysinfo.children
 	def plugId = getDataValue("plugId")
-    def switchState = "off"
+    def switchState
 	children.each {
 		if (it.id == plugId) {
 			if (it.state == 1) {
             	switchState = "on"
-			}
+			} else {
+            	switchState = "off"
+            }
 		}
 	}
 	sendEvent(name: "switch", value: "${switchState}")

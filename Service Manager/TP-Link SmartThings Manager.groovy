@@ -381,7 +381,7 @@ def addDevices() {
 	tpLinkModel << ["RE370" : "TP-Link Smart RE Plug"]
 	//	Miltiple Outlet Plug
 	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]
-	tpLinkModel << ["HS300" : "TP-Link Smart Multi-Plug"]
+	tpLinkModel << ["HS300" : "TP-Link Smart EM Multi-Plug"]
 	tpLinkModel << ["KP200" : "TP-Link Smart Multi-Plug"]
 	tpLinkModel << ["KP400" : "TP-Link Smart Multi-Plug"]
 	//	Dimming Switch Devices

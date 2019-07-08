@@ -193,7 +193,8 @@ def refreshResponse(cmdResponse){
 
 //	===== Get Current Energy Data =====
 def getPower(){
-	sendCmdtoServer("""{"emeter":{"get_realtime":{}}}""", "deviceCommand", "energyMeterResponse")
+	def plugId = getDataValue("plugId")
+	sendCmdtoServer("""{"context":{"child_ids":["${plugId}"]},"emeter":{"get_realtime":{}}}""", "deviceCommand", "energyMeterResponse")
 }
 
 def energyMeterResponse(cmdResponse) {
@@ -217,7 +218,8 @@ def energyMeterResponse(cmdResponse) {
 
 //	===== Get Today's Consumption =====
 def getConsumption(){
-	sendCmdtoServer("""{"emeter":{"get_daystat":{"month": ${state.monthToday}, "year": ${state.yearToday}}}}""", "emeterCmd", "useTodayResponse")
+	def plugId = getDataValue("plugId")
+	sendCmdtoServer("""{"context":{"child_ids":["${plugId}"]},"emeter":{"get_daystat":{"month": ${state.monthToday}, "year": ${state.yearToday}}}}""", "emeterCmd", "useTodayResponse")
 }
 
 def useTodayResponse(cmdResponse) {
@@ -243,7 +245,8 @@ def getEnergyStats() {
 	state.monTotDays = 0
 	state.wkTotEnergy = 0
 	state.wkTotDays = 0
-	sendCmdtoServer("""{"emeter":{"get_daystat":{"month": ${state.monthToday}, "year": ${state.yearToday}}}}""", "emeterCmd", "engrStatsResponse")
+	def plugId = getDataValue("plugId")
+	sendCmdtoServer("""{"context":{"child_ids":["${plugId}"]},"emeter":{"get_daystat":{"month": ${state.monthToday}, "year": ${state.yearToday}}}}""", "emeterCmd", "engrStatsResponse")
 	runIn(4, getPrevMonth)
 }
 
@@ -260,13 +263,15 @@ def getPrevMonth() {
 		prevMonth = prevMonth + 1
 		runIn(4, getJan)
 	}
-	sendCmdtoServer("""{"emeter":{"get_daystat":{"month": ${prevMonth}, "year": ${state.yearStart}}}}""", "emeterCmd", "engrStatsResponse")
+	def plugId = getDataValue("plugId")
+	sendCmdtoServer("""{"context":{"child_ids":["${plugId}"]},"emeter":{"get_daystat":{"month": ${prevMonth}, "year": ${state.yearStart}}}}""", "emeterCmd", "engrStatsResponse")
 }
 
 def getJan() {
 //	Gets January data on March 1 and 2.  Only access if current month = 3
 //	and start month = 1
-	sendCmdtoServer("""{"emeter":{"get_daystat":{"month": ${state.monthStart}, "year": ${state.yearStart}}}}""", "emeterCmd", "engrStatsResponse")
+	def plugId = getDataValue("plugId")
+	sendCmdtoServer("""{"context":{"child_ids":["${plugId}"]},"emeter":{"get_daystat":{"month": ${state.monthStart}, "year": ${state.yearStart}}}}""", "emeterCmd", "engrStatsResponse")
 }
 
 def engrStatsResponse(cmdResponse) {

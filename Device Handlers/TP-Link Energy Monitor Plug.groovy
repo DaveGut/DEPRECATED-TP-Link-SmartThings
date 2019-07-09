@@ -29,6 +29,7 @@ metadata {
 				vid: "generic-switch-power-energy") {
 		capability "Switch"
 		capability "refresh"
+		capability "Actuator"
 		capability "Health Check"
 		capability "Power Meter"
 		command "getPower"

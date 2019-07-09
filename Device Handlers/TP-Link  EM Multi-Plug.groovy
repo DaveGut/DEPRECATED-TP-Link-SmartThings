@@ -20,7 +20,7 @@ All  development is based upon open-source data on the TP-Link devices; primaril
 06.02.19	4.0.02	Fixed problem where action tiles did not detect state change.
 07.08.19	4.0.03	Created Energy Monitor version of Multi-Plug for the HS-300.
 ======== DO NOT EDIT LINES BELOW ===========================*/
-	def devVer()	{ return "4.0.02" }
+	def devVer()	{ return "4.0.03" }
 metadata {
 	definition (name: "TP-Link Smart EM Multi-Plug", 
     			namespace: "davegut", 
@@ -30,6 +30,7 @@ metadata {
                 vid: "generic-switch") {
 		capability "Switch"
 		capability "refresh"
+		capability "Actuator"
 		capability "Health Check"
 		capability "Power Meter"
 		command "getPower"

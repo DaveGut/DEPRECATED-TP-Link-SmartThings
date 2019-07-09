@@ -29,6 +29,7 @@ metadata {
                 vid: "generic-switch") {
 		capability "Switch"
 		capability "refresh"
+		capability "Actuator"
 		capability "Health Check"
 	}
 	tiles(scale: 2) {

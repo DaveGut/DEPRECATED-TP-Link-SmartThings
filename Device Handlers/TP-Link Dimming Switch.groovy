@@ -28,6 +28,7 @@ metadata {
                 vid: "generic-dimmer") {
 		capability "Switch"
 		capability "refresh"
+		capability "Actuator"
 		capability "Health Check"
 			capability "Switch Level"
 	}

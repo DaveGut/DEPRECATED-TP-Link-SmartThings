@@ -29,6 +29,7 @@ metadata {
 		capability "Switch"
 		capability "Switch Level"
 		capability "refresh"
+		capability "Actuator"
 		capability "Health Check"
 	}
 	tiles(scale: 2) {

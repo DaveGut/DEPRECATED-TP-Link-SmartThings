@@ -22,11 +22,12 @@ development is based upon open-source data on the TP-Link Kasa Devices; primaril
 02.24.19	4.0.02.	Fix code to eliminate periodic error on initial installation.  Genericised text to accommodate
 			differnces in IOS and Android interface.
 03.17.19	4.0.03.	Modified User Interface to address IOS problem where the user sometimes does not see the "save".
-04.06.10	4.0.04.	Added KP200 and KP400 to installation.
+04.06.19	4.0.04.	Added KP200 and KP400 to installation.
+07.09.19	4.0.05.	Added error catch routine in addDevices that will provide clear test message with cause.
 	====== Application Information ==========================*/
     def traceLogging() { return true }
 //	def traceLogging() { return false }
-	def appVersion() { return "4.0.04" }
+	def appVersion() { return "4.0.05" }
 	def driverVersion() { return "4.0" }
     def hubVersion() { return "4.0" }
 //	===========================================================
@@ -403,54 +404,52 @@ def addDevices() {
 	tpLinkModel << ["KL130" : "TP-Link Smart Color Bulb"]
 	tpLinkModel << ["LB230" : "TP-Link Smart Color Bulb"]
 
-		def hub = location.hubs[0]
-		def hubId = hub.id
+	def hub = location.hubs[0]
+	def hubId = hub.id
 	selectedAddDevices.each { dni ->
-		try {
-			def isChild = getChildDevice(dni)
-			if (!isChild) {
-				def device = state.devices.find { it.value.deviceNetworkId == dni }
-				def deviceModel = device.value.deviceModel
+		def isChild = getChildDevice(dni)
+		if (!isChild) {
+			def device = state.devices.find { it.value.deviceNetworkId == dni }
+			def deviceModel = device.value.deviceModel
 			def deviceData
 			if (installType == "Kasa Account") {
-				deviceData = [
-					"installType" : "Kasa Account",
-					"deviceId" : device.value.deviceId,
-					"plugId" : device.value.plugId,
-					"appServerUrl" : device.value.appServerUrl,
-					"appVersion" : appVersion()
-				]
-			} else {
-				deviceData = [
-					"installType" : "Node Applet",
-					"deviceId" : device.value.deviceId,
-					"plugId" : device.value.plugId,
-					"deviceIP" : device.value.deviceIP,
-					"gatewayIP" : bridgeIp,
-                    "hubVersion": state.hubVersion,
-					"appVersion" : appVersion()
-				]
-			}
-
-				addChildDevice(
-                	"davegut", 
-                	tpLinkModel["${deviceModel}"],
-                    device.value.deviceNetworkId,
-                    hubId, [
-                    	"label" : device.value.alias,
-                    	"name" : deviceModel,
-						"data" : deviceData
-					]
-                )
-				log.info "Installed TP-Link ${deviceModel} ${device.value.alias}"
-			}
-		} catch (e) {
-			log.debug "Error Adding ${deviceModel} ${device.value.alias}: ${e}"
+			deviceData = [
+				"installType" : "Kasa Account",
+				"deviceId" : device.value.deviceId,
+				"plugId" : device.value.plugId,
+				"appServerUrl" : device.value.appServerUrl,
+				"appVersion" : appVersion()
+			]
+		} else {
+			deviceData = [
+				"installType" : "Node Applet",
+				"deviceId" : device.value.deviceId,
+				"plugId" : device.value.plugId,
+				"deviceIP" : device.value.deviceIP,
+				"gatewayIP" : bridgeIp,
+				"hubVersion": state.hubVersion,
+				"appVersion" : appVersion()
+			]
 		}
-	}
-    app.deleteSetting("selectedAddDevices")
+			log.info "Installing TP-Link ${deviceModel} ${device.value.alias}"
+			try {
+				addChildDevice(
+    		           	"davegut", 
+        		       	tpLinkModel["${deviceModel}"],
+            		    device.value.deviceNetworkId,
+						hubId, [
+		                "label" : device.value.alias,
+	    	            "name" : deviceModel,
+    	    	        "data" : deviceData]
+	            	    )
+			} catch (e) {
+				log.warn("Failed to install ${device.value.alias}.  Driver ${tpLinkModel["${deviceModel}"]} most likely not installed.")
+			}
+		}
+	    app.deleteSetting("selectedAddDevices")
+    }
 }
-
+        
 def updatePreferences() {
 	traceLog("updatePreferences ${selectedUpdateDevices}, ${userLightTransTime}, ${userRefreshRate}")
     state.flowType = null

@@ -1,3 +1,8 @@
+# This integration is DEPRECIATED.
+SmartThings now has native integration of TP-Link/Kasa products.
+https://www.smartthings.com/products/-/filter/brands/tp-link
+
+
 # TP-Link / Kasa Smart Home Device SmartThings Integration
 (Note:  The previous version is still available in the directory "Old Version")
 

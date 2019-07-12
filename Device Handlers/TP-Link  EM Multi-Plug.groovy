@@ -19,6 +19,8 @@ All  development is based upon open-source data on the TP-Link devices; primaril
 					Updated Service Manager to Device communications.
 06.02.19	4.0.02	Fixed problem where action tiles did not detect state change.
 07.08.19	4.0.03	Created Energy Monitor version of Multi-Plug for the HS-300.
+07.12.19	4.0.04	Updated vid definition for proper display of power/energy in
+					new ST app.
 ======== DO NOT EDIT LINES BELOW ===========================*/
 	def devVer()	{ return "4.0.03" }
 metadata {
@@ -27,7 +29,7 @@ metadata {
                 author: "Dave Gutheinz, Anthony Ramirez", 
                 ocfDeviceType: "oic.d.smartplug", 
                 mnmn: "SmartThings", 
-                vid: "generic-switch") {
+                vid:"generic-switch-power-energy") {
 		capability "Switch"
 		capability "refresh"
 		capability "Actuator"

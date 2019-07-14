@@ -25,7 +25,7 @@ metadata {
                 author: "Dave Gutheinz, Anthony Ramirez",
                 ocfDeviceType: "oic.d.light",
                 mnmn: "SmartThings", 
-                vid: "generic-dimmer") {
+                vid: "generic-rgbw-color-bulb") {
 		capability "Switch"
 		capability "Switch Level"
 		capability "refresh"

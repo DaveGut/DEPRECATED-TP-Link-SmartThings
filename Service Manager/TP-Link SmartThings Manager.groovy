@@ -24,10 +24,11 @@ development is based upon open-source data on the TP-Link Kasa Devices; primaril
 03.17.19	4.0.03.	Modified User Interface to address IOS problem where the user sometimes does not see the "save".
 04.06.19	4.0.04.	Added KP200 and KP400 to installation.
 07.09.19	4.0.05.	Added error catch routine in addDevices that will provide clear test message with cause.
+02.11.20	4.0.06. Added KP303 multi-plug.
 	====== Application Information ==========================*/
     def traceLogging() { return true }
 //	def traceLogging() { return false }
-	def appVersion() { return "4.0.05" }
+	def appVersion() { return "4.0.06" }
 	def driverVersion() { return "4.0" }
     def hubVersion() { return "4.0" }
 //	===========================================================
@@ -384,6 +385,7 @@ def addDevices() {
 	tpLinkModel << ["HS107" : "TP-Link Smart Multi-Plug"]
 	tpLinkModel << ["HS300" : "TP-Link Smart EM Multi-Plug"]
 	tpLinkModel << ["KP200" : "TP-Link Smart Multi-Plug"]
+	tpLinkModel << ["KP303" : "TP-Link Smart Multi-Plug"]
 	tpLinkModel << ["KP400" : "TP-Link Smart Multi-Plug"]
 	//	Dimming Switch Devices
 	tpLinkModel << ["HS220" : "TP-Link Smart Dimming Switch"]
@@ -395,6 +397,8 @@ def addDevices() {
 	tpLinkModel << ["LB110" : "TP-Link Smart Soft White Bulb"]
 	tpLinkModel << ["KL110" : "TP-Link Smart Soft White Bulb"]
 	tpLinkModel << ["LB200" : "TP-Link Smart Soft White Bulb"]
+	tpLinkModel << ["KL50(" : "TP-Link Smart Soft White Bulb"]
+	tpLinkModel << ["KL60(" : "TP-Link Smart Warm Amber Bulb"]
 	//	Tunable White Bulbs
 	tpLinkModel << ["LB120" : "TP-Link Smart Tunable White Bulb"]
 	tpLinkModel << ["KL120" : "TP-Link Smart Tunable White Bulb"]

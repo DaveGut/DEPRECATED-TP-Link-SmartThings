@@ -4,6 +4,7 @@ a.	Add capability to open an installed application.
 b.	Add a sendKey command buffer (if testing indicates).
 c.	Add text box capability (if it works).
 */
+def driverVer() { return "WS V2" }
 import groovy.json.JsonOutput
 metadata {
 	definition (name: "Hubitat-Samsung Remote",
@@ -11,8 +12,7 @@ metadata {
 				author: "David Gutheinz",
 				importUrl: ""
 			   ){
-		capability "Switch"
-		command "hubCheck"				//	Checks hub's connectivity to Hubitat
+//		capability "Switch"
 		command "sendKey", ["string"]	//	Creates sendKey data
 		command "connect"				//	Checks for token update then updates
 		command "close"					//	command to close socket,60 sec lag
@@ -39,9 +39,7 @@ metadata {
 		//	===== Utility Keys =====
 		command "tools"
 		command "menu"
-
-		attribute "wsStatus", "string"
-		attribute "hubComms", "bool"
+//		attribute "wsStatus", "string"
 	}
 	preferences {
 		input ("deviceIp", "text", title: "Samsung TV Ip")
@@ -49,7 +47,8 @@ metadata {
 		input ("hubPort", "text", title: "NodeJs Hub Port", defaultValue: "8080")
 		def tvModes = ["TV", "HDMI", "AMBIENT", "ART_MODE"]
 		input ("tvPwrOnMode", "enum", title: "TV Startup Display", options: tvModes)
-//		input ("extPower", "bool", title: "Use External Device for Power Control", defaultValue: false)
+		input ("debug", "bool",  title: "Enable debug logging", defaultValue: false)
+		input ("info", "bool",  title: "Enable description text logging", defaultValue: false)
 	}
 }
 def installed() {
@@ -59,17 +58,12 @@ def installed() {
 }
 def updated() {
 	logInfo("updated: get device data and model year")
-	def tokenSupport
-//	if (!getDataValue("tokenSupport") {
-		tokenSupport = getDeviceData()
-//	}
-//	if (getDataValue("tokenSupport") == "true") {
-//		hubCheck()
-//		runEvery15Minutes(hubCheck)
-//	}
-	runIn(2, connect)
+	unschedule()
+	def tokenSupport = getDeviceData()
+	runIn(2, checkInstall)
 }
 def getDeviceData() {
+	logInfo("getDeviceData: Updating Device Data.")
 	def tokenSupport = "false"
 	httpGet([uri: "http://${deviceIp}:8001/api/v2/", timeout: 5]) { resp ->
 		updateDataValue("deviceMac", resp.data.device.wifiMac)
@@ -86,11 +80,22 @@ def getDeviceData() {
 		def uuid = resp.data.device.duid.substring(5)
 		updateDataValue("uuid", uuid)
 		updateDataValue("tokenSupport", tokenSupport)
+//		logDebug("getDeviceData: year = $modelYear, frameTv = $frameTv, tokenSupport = $tokenSupport")
+		logTrace("getDeviceData: year = $modelYear, frameTv = $frameTv, tokenSupport = $tokenSupport")
 	}
-	logDebug("getDeviceData: Updated Device Data.")
 	return tokenSupport
 }
 
+def checkInstall() {
+	logInfo("<b>Performing test using tokenSupport = ${getDataValue("tokenSupport")}")
+	getDeviceData()
+	pauseExecution(2000)
+	connect()
+	pauseExecution(10000)
+	menu()
+	pauseExecution(2000)
+	close()
+}
 
 //	===== Key Definitions =====
 def on() {
@@ -110,18 +115,19 @@ def off() {
 		pauseExecution(3000)
 		sendKey("POWER", "Release")
 	}
-	pauseExecution(200)
-	close()
 }
 
 //	===== TV Source Modes
 def toggleArt() {
-	if (getDataValue("frameTv") == "true") { sendKey("POWER") }
+	if (getDataValue("frameTv") == "true") {
+		sendKey("POWER")
+	} else {
+		logDebug("toggleArt only works for Frame TV's")
+	}
 }
 def ambientMode() { sendKey("AMBIENT") }
 def HDMI() { sendKey("HDMI") }
 def TV() { sendKey("TV") }
-
 	   
 def tools() { sendKey("TOOLS") }
 def menu() { sendKey("MENU") }
@@ -141,8 +147,6 @@ def channelDown() { sendKey("CHDOWN") }
 def guide() { sendKey("GUIDE") }
 def exit() { sendKey("EXIT") }
 
-//	===== Hubitat to Hub interface =====
-
 //	===== WebSocket Interface =====
 //def getToken() { sendWsCmd("getToken") }
 def connect() { sendWsCmd("connect") }
@@ -158,69 +162,60 @@ def close() {
 }
 
 //	===== Comms and Control for NodeJS Servr =====
-def hubCheck() {
-	sendWsCmd("hubCheck")
-	runIn(5, hubCheckFail)
-}
-def hubCheckFail() { sendEvent(name: "hubComms", value: false) }
 def sendWsCmd(command, data = "") {
-	logDebug("sendWsCmd: ${command} | ${data}")
+//	logDebug("sendWsCmd: ${command} | ${data}")
+	logTrace("sendWsCmd: ${command} | ${data}")
 	def name = getDataValue("name64")
 	def token = state.token
-	if (device.currentValue("wsStatus") == "closed") { command = connect }
-	url = "wss://${deviceIp}:8002/api/v2/channels/samsung.remote.control?name=${name}&token=${token}"
-	def headers = [HOST: "${hubIp}:${hubPort}", command: command, data: data, url: url]
-	sendHubCommand(new hubitat.device.HubAction([headers: headers],
+	def url = "wss://${deviceIp}:8002/api/v2/channels/samsung.remote.control?name=${name}&token=${token}"
+	if (getDataValue("tokenSupport") == "true") {
+		def headers = [HOST: "${hubIp}:${hubPort}", command: command, data: data, url: url]
+		sendHubCommand(new hubitat.device.HubAction([headers: headers],
 												device.deviceNetworkId,
 												[callback: wsHubParse]))
+	} else {
+		switch(command) {
+			case "connect":
+				url = "ws://${deviceIp}:8001/api/v2/channels/samsung.remote.control?name=${name}"
+				interfaces.webSocket.connect(url)
+				break
+			case "sendMessage":
+				interfaces.webSocket.sendMessage(data)
+				break
+			case "close":
+				interfaces.webSocket.close()
+				break
+			default:
+				logWarn("sendWsCmd: Invalid command")
+		}
+	}
 }
 def wsHubParse(response) {
+	//	===== NodeJs Return Parse =====
 	def command = response.headers.command
 	def cmdResponse = response.headers.cmdResponse
-	def statusMsg = ""
-	def resp
-	def event = "hubCheck: OK"
-	resp = parseJson(cmdResponse)
-	if(resp.error) {
-		statusMsg = "ERROR: ${resp.error}"
+	def hubStatus = response.headers.hubStatus
+	def wsDeviceStatus = response.headers.wsDeviceStatus
+	def data = "command = ${command} || hubStatus = ${hubStatus} || "
+	data += "wsDeviceStatus = ${wsDeviceStatus} || cmdResponse = ${cmdResponse}"
+//	logDebug("wsHubParse: ${data}")
+	logTrace("wsHubParse: ${data}")
+	if (cmdResponse == "{}") { return }
+	//	===== Check connect response for token update.
+	def resp = parseJson(cmdResponse)
+	def respData = parseJson(resp.cmdData)
+	def newToken = respData.data.token
+	if (newToken != state.token && newToken) {
+//		logDebug("wsHubParse: token updated to ${newToken}")
+		logTrace("wsHubParse: token updated to ${newToken}")
+		state.token = newToken
 	}
-	switch(command) {
-		case "hubCheck":
-			unschedule(hubCheckFail)
-			sendEvent(name: "hubComms", value: true)
-			statusMsg = "Hub Check Successful."
-			break
-		case "getToken":
-		case "connect":
-			def wsStatus = "open"
-			if (resp.wsStatus == "open") {
-				statusMsg = "Connect successful. "
-			} else {
-				wsStatus = "closed"
-				statusMsg = "Connect failed."
-			}
-			sendEvent(name: "wsStatus", value: wsStatus)
-			def token = parseJson(resp.respData).data.token
-			if(token != state.token && token != null) {
-				state.token = token
-				statusMsg += "Token Updated"
-			}
-			break
-		case "close":
-			if (resp.wsStatus == "closed") {
-				statusMsg = "Close successful."
-			} else {
-				statusMsg = "Close failed."
-			}
-			sendEvent(name: "wsStatus", value: resp.wsStatus)
-			break
-		case "sendMessage":
-			statusMsg = "Send Message Successful."
-			break
-		default:
-			statusMessage = "DEFAULT ERROR"
-	}
-	logDebug("wsHubParse - ${command}: status = ${statusMsg}")
+}
+def parse(message) {
+	logTrace("parse: ${message}")
+}
+def webSocketStatus(message) {
+	logTrace("webSocketStatus: ${message}")
 }
 
 //	===== Wake On Lan =====
@@ -232,7 +227,15 @@ def wakeOnLan() {
 }
 
 //	===== Logging =====
-def logTrace(msg) { log.trace "websocket V2 || ${msg}" }
-def logInfo(msg) { log.info "websocket V2 || ${msg}" }
-def logDebug(msg) { log.debug "websocket V2 || ${msg}" }
-def logWarn(msg) { log.warn "websocket V2 || ${msg}" }
+def logTrace(msg) { log.trace "${driverVer()} || ${msg}" }
+def logInfo(msg) { 
+	if (info == true) {
+		log.info "${driverVer()} || ${msg}"
+	}
+}
+def logDebug(msg) {
+	if (debug == true) {
+		log.debug "${driverVer()} || ${msg}"
+	}
+}
+def logWarn(msg) { log.warn "${driverVer()} || ${msg}" }

@@ -33,10 +33,10 @@ function onRequest(request, response){
 	var command = request.headers.command
 	var data = request.headers.data
 	var url = request.headers.url
-	var cmdRcvd = "\n\rCommand Data = " + command + " | " + data + " | " + url
-	logResponse(" ")
+	var cmdRcvd = "\n\rCommand Data = " + command + " | " + data + " | " + url + " | " + wsDeviceStatus
+//	logResponse(" ")
 	logResponse(cmdRcvd)
-	console.log(" ")
+//	console.log(" ")
 	console.log(cmdRcvd)
 	cmdResponse = {}
 	if (wsDeviceStatus == "closed" && command != "hubCheck") {
@@ -86,6 +86,11 @@ function wsDeviceOpen(connectUrl, data) {
 		wsDeviceStatus = "closed"
 	});
 	wsDevice.on('error', (err) => {
+		var message = "\n\rwsDevice.on(error): error = " + err
+//		logResponse(" ")
+		logResponse(cmdRcvd)
+//		console.log(" ")
+		console.log(cmdRcvd)
 		wsDeviceStatus = "error"
 		cmdResponse["cmdStatus"] = "error"
 		cmdResponse["cmdData"] = err
@@ -100,6 +105,6 @@ function wsDeviceOpen(connectUrl, data) {
 //----- Utility - Response Logging Function ------------------------
 function logResponse(respMsg) {
 	if (logFile == "yes") {
-		fs.appendFileSync("error.log", "\r" + respMsg)
+		fs.appendFileSync("Hubitat-Websocket.log", "\r" + respMsg)
 	}
 }

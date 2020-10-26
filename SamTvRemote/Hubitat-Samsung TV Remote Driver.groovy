@@ -5,6 +5,7 @@ b.	Add a sendKey command buffer (if testing indicates).
 c.	Add text box capability (if it works).
 */
 def driverVer() { return "WS V2" }
+def traceLog() { return true }
 import groovy.json.JsonOutput
 metadata {
 	definition (name: "Hubitat-Samsung Remote",
@@ -12,16 +13,17 @@ metadata {
 				author: "David Gutheinz",
 				importUrl: ""
 			   ){
-//		capability "Switch"
+		capability "Switch"
 		command "sendKey", ["string"]	//	Creates sendKey data
 		command "connect"				//	Checks for token update then updates
 		command "close"					//	command to close socket,60 sec lag
 		//	===== TV Input Modes
 		command "HDMI"		//	toggles through occupied HDMI ports
 		command "TV"
-		command "frameSet"
 		command "toggleArt"
 		command "ambientMode"
+		command "aArtModeOn"
+		command "aArtModeOff"
 		//	===== Physical Remote Keys =====
 		command "volumeUp"
 		command "volumeDown"
@@ -31,15 +33,19 @@ metadata {
 		command "home"
 		command "guide"
 		command "exit"
-		command "left"
-		command "right"
-		command "up"
-		command "down"
+		command "arrowLeft"
+		command "arrowRight"
+		command "arrowUp"
+		command "arrowDown"
 		command "enter"
-		//	===== Utility Keys =====
 		command "tools"
 		command "menu"
-//		attribute "wsStatus", "string"
+		command "source"
+		command "info"
+		command "channelList"
+		
+//		command "aSendText", ["string"]
+//		command "aGetAppsList"
 	}
 	preferences {
 		input ("deviceIp", "text", title: "Samsung TV Ip")
@@ -65,31 +71,33 @@ def updated() {
 def getDeviceData() {
 	logInfo("getDeviceData: Updating Device Data.")
 	def tokenSupport = "false"
-	httpGet([uri: "http://${deviceIp}:8001/api/v2/", timeout: 5]) { resp ->
-		updateDataValue("deviceMac", resp.data.device.wifiMac)
-		def modelYear = "20" + resp.data.device.model[0..1]
-		updateDataValue("modelYear", modelYear)
-		def frameTv = "false"
-		if (resp.data.device.FrameTvSupport) {
-			frameTv = resp.data.device.FrameTvSupport
-		}
-		updateDataValue("frameTv", frameTv)
-		if (resp.data.device.TokenAuthSupport) {
-			tokenSupport = resp.data.device.TokenAuthSupport
-		}
-		def uuid = resp.data.device.duid.substring(5)
-		updateDataValue("uuid", uuid)
-		updateDataValue("tokenSupport", tokenSupport)
-//		logDebug("getDeviceData: year = $modelYear, frameTv = $frameTv, tokenSupport = $tokenSupport")
-		logTrace("getDeviceData: year = $modelYear, frameTv = $frameTv, tokenSupport = $tokenSupport")
-	}
+	try{
+		httpGet([uri: "http://${deviceIp}:8001/api/v2/", timeout: 5]) { resp ->
+			updateDataValue("deviceMac", resp.data.device.wifiMac)
+			def modelYear = "20" + resp.data.device.model[0..1]
+			updateDataValue("modelYear", modelYear)
+			def frameTv = "true"
+			if (resp.data.device.FrameTVSupport) {
+				frameTv = resp.data.device.FrameTVSupport
+			}
+			updateDataValue("frameTv", frameTv)
+			if (resp.data.device.TokenAuthSupport) {
+				tokenSupport = resp.data.device.TokenAuthSupport
+			}
+			def uuid = resp.data.device.duid.substring(5)
+			updateDataValue("uuid", uuid)
+			updateDataValue("tokenSupport", tokenSupport)
+			logDebug("getDeviceData: year = $modelYear, frameTv = $frameTv, tokenSupport = $tokenSupport")
+			logTrace("getDeviceData: year = $modelYear, frameTv = $frameTv, tokenSupport = $tokenSupport")
+		} 
+	} catch (error) {  }
+		
 	return tokenSupport
 }
 
 def checkInstall() {
 	logInfo("<b>Performing test using tokenSupport = ${getDataValue("tokenSupport")}")
-	getDeviceData()
-	pauseExecution(2000)
+	logTrace("<b>Performing test using tokenSupport = ${getDataValue("tokenSupport")}")
 	connect()
 	pauseExecution(10000)
 	menu()
@@ -97,12 +105,45 @@ def checkInstall() {
 	close()
 }
 
+//	===== TEST Commands =====
+def aArtModeOn() { artModeSet("on") }
+def aArtModeOff() { artModeSet("off") }
+def artModeSet(onOff) {
+	def cmdData = JsonOutput.toJson([id:getDataValue("uuid"),value:onOff,request:"set_artmode_status"])
+	def data = """{"method":"ms.channel.emit","params":{"event":"art_app_request",""" +
+		""""to":"host","clientIp": "${deviceIp}","deviceName":"${getDataValue("name64")}",""" +
+		""""data":"${cmdData}"}}"""
+	log.trace data
+	sendWsCmd("sendMessage", data)
+}
+def aGetAppsList() {
+	def data = """{"method":"ms.channel.emit","params":{"event":"ed.installedApp.get","to":"host"}}"""
+	log.trace data
+	sendWsCmd("sendMessage", data)
+}
+def aSendText(text) {
+	def data = """{"method":"ms.remote.control","params":{"Cmd":"${text.encodeAsBase64().toString()}",""" +
+		""""DataOfCmd":"base64","typeOfRemote":"SendInputString"}}"""
+	log.trace data
+	sendWsCmd("sendMessage", data)
+}
+
+
+
 //	===== Key Definitions =====
 def on() {
+	def newMac = getDataValue("deviceMac").replaceAll(":","").replaceAll("-","")
+	logDebug("on: sending WOL packet to ${newMac}")
+	logTrace("on: sending WOL packet to ${newMac}")
+	def result = new hubitat.device.HubAction (
+		"wake on lan $newMac",
+		hubitat.device.Protocol.LAN,
+		null
+	)
+	sendHubCommand(result)
 	sendEvent(name: "switch", value: "on")
-	wakeOnLan()
 	if(tvPwrOnMode) {
-		pauseExecution(15000)
+		pauseExecution(10000)
 		if(tvPwrOnMode == "ART_MODE") { toggleArt() }
 		else { sendKey(tvPwrOnMode) }
 	}
@@ -116,7 +157,6 @@ def off() {
 		sendKey("POWER", "Release")
 	}
 }
-
 //	===== TV Source Modes
 def toggleArt() {
 	if (getDataValue("frameTv") == "true") {
@@ -128,16 +168,18 @@ def toggleArt() {
 def ambientMode() { sendKey("AMBIENT") }
 def HDMI() { sendKey("HDMI") }
 def TV() { sendKey("TV") }
-	   
 def tools() { sendKey("TOOLS") }
 def menu() { sendKey("MENU") }
+def source() { sendKey("SOURCE") }
+def info() { sendKey("INFO") }
+def channelList() { sendKey("CH_LIST") }
 
 //	===== Standard Remote Keys"
 def home() { sendKey("HOME") }
-def left() { sendKey("LEFT") }
-def right() { sendKey("RIGHT") }
-def up() { sendKey("UP") }
-def down() { sendKey("DOWN") }
+def arrowLeft() { sendKey("LEFT") }
+def arrowRight() { sendKey("RIGHT") }
+def arrowUp() { sendKey("UP") }
+def arrowDown() { sendKey("DOWN") }
 def enter() { sendKey("ENTER") }
 def volumeUp() { sendKey("VOLUP") }
 def volumeDown() { sendKey("VOLDOWN") }
@@ -157,7 +199,6 @@ def sendKey(key, cmd = "Click") {
 	sendWsCmd("sendMessage", data)
 }
 def close() {
-	sendEvent(name: "wsStatus", value: "closed")
 	sendWsCmd("close")
 }
 
@@ -167,12 +208,14 @@ def sendWsCmd(command, data = "") {
 	logTrace("sendWsCmd: ${command} | ${data}")
 	def name = getDataValue("name64")
 	def token = state.token
-	def url = "wss://${deviceIp}:8002/api/v2/channels/samsung.remote.control?name=${name}&token=${token}"
+//	def url = "wss://${deviceIp}:8002/api/v2/channels/samsung.remote.control?name=${name}&token=${token}"
+	def url = "https://${deviceIp}:8002/api/v2/channels/samsung.remote.control?name=${name}&token=${token}"
 	if (getDataValue("tokenSupport") == "true") {
 		def headers = [HOST: "${hubIp}:${hubPort}", command: command, data: data, url: url]
 		sendHubCommand(new hubitat.device.HubAction([headers: headers],
 												device.deviceNetworkId,
 												[callback: wsHubParse]))
+
 	} else {
 		switch(command) {
 			case "connect":
@@ -198,7 +241,7 @@ def wsHubParse(response) {
 	def wsDeviceStatus = response.headers.wsDeviceStatus
 	def data = "command = ${command} || hubStatus = ${hubStatus} || "
 	data += "wsDeviceStatus = ${wsDeviceStatus} || cmdResponse = ${cmdResponse}"
-//	logDebug("wsHubParse: ${data}")
+	logDebug("wsHubParse: ${data}")
 	logTrace("wsHubParse: ${data}")
 	if (cmdResponse == "{}") { return }
 	//	===== Check connect response for token update.
@@ -206,7 +249,7 @@ def wsHubParse(response) {
 	def respData = parseJson(resp.cmdData)
 	def newToken = respData.data.token
 	if (newToken != state.token && newToken) {
-//		logDebug("wsHubParse: token updated to ${newToken}")
+		logDebug("wsHubParse: token updated to ${newToken}")
 		logTrace("wsHubParse: token updated to ${newToken}")
 		state.token = newToken
 	}
@@ -218,16 +261,12 @@ def webSocketStatus(message) {
 	logTrace("webSocketStatus: ${message}")
 }
 
-//	===== Wake On Lan =====
-def wakeOnLan() {
-	def mac = getDataValue("deviceMac").replaceAll(":","").replaceAll("-","")
-	logDebug("wakeOnLan: sending WOL packet to ${mac}")
-    def result = new hubitat.device.HubAction (
-		"wake on lan ${mac}", hubitat.device.Protocol.LAN, null)
-}
-
 //	===== Logging =====
-def logTrace(msg) { log.trace "${driverVer()} || ${msg}" }
+def logTrace(msg) { 
+	if (traceLog() == true) {
+		log.trace "${driverVer()} || ${msg}"
+	}
+}
 def logInfo(msg) { 
 	if (info == true) {
 		log.info "${driverVer()} || ${msg}"

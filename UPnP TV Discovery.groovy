@@ -7,7 +7,7 @@ Media Player and MainTvAgent2
 ===== HUBITAT INTEGRATION VERSION =======================================================*/
 //import org.json.JSONObject
 def appVersion() { return "TEST" }
-def appName() { return "UPnP Identification" }
+def appName() { return "UPnP TV Test" }
 definition(
 	name: "UPnP Identification",
 	namespace: "davegut",
@@ -26,15 +26,13 @@ preferences {
 
 //	===== Page Definitions =====
 def mainPage() {
+	logInfo("mainPage")
 	setInitialStates()
 	ssdpSubscribe()
-	def page1 = "0.  Turn on devices you wish to check.\n"
+	def page1 = "0.  Turn on devices you wish to check for at least 1 minute.\n"
 	page1 += "1.  Press 'Next' to find UPnP devices.\n"
-	page1 += "2.  Select '<< App List' to return.\n"
-	page1 += "3.  When done, open the App info page (gear icon), Application States.\n"
-	page1 += "    a.  mediaPlayers contains the Media Player data.\n"
-	page1 += "    b.  mainTvAgents contains the tv agent devices.\n"
-	page1 += "    c.  remoteControlRxs contains th remote control receiver devices."
+	page1 += "2.  When done, open the App info page (gear icon), Application States.\n"
+	page1 += "    I need the <b>devices</b> data from the states section.\n"
 	return dynamicPage(
 		name: "mainPage",
 		title: "UPnP Identification", 
@@ -45,39 +43,14 @@ def mainPage() {
 	}
 }
 def discovery() {
-	def mrPlayers = "Device Name\tModel\t\tIPAddress"
-	def mediaPlayers = state.mediaPlayers
-	def mpCount = 0
-	mediaPlayers.each {
-		if (it.value.name) {
-			mrPlayers += "\n${it.value.name.padRight(15)}\t${it.value.model.padRight(15)}\t${it.value.ip}"
-			mpCount += 1
-		}
+	logInfo("discovery")
+	def devices = state.devices
+	def devList = ""
+	devices.each {
+		devList += "${it}\n\n"
 	}
-
-	def tvAgents = "Device Name\tModel\t\tIPAddress"
-	def mainTvAgents = state.mainTvAgents
-	def tvCount = 0
-	mainTvAgents.each {
-		if (it.value.name) {
-			tvAgents += "\n${it.value.name.padRight(15)}\t${it.value.model.padRight(15)}\t${it.value.ip}"
-			tvCount += 1
-		}
-	}
-
-	def rcReceivers = "Device Name\tModel\t\tIPAddress"
-	def remoteControlRxs = state.remoteControlRxs
-	def rcrCount = 0
-	remoteControlRxs.each {
-		if (it.value.name) {
-			rcReceivers += "\n${it.value.name.padRight(15)}\t${it.value.model.padRight(15)}\t${it.value.ip}"
-			rcrCount += 1
-		}
-	}
-
 	ssdpDiscover()
-	def text2 = "Please wait while we discover your devices. Discovery can take "+
-				"several minutes\n\r\n\r"
+	def text2 = "<b>Allow at least two minutes to discover your devices</b>\n\r\n\r"
 	return dynamicPage(
 		name: "discovery", 
 		title: "Device Discovery",
@@ -85,23 +58,17 @@ def discovery() {
 		refreshInterval: 10, 
 		install: true, 
 		uninstall: true){
-			section() {
-				paragraph "<b>${mpCount} Media Player Devices</b>"
-				paragraph "<textarea rows=${mpCount + 1} cols=45 readonly='true'>${mrPlayers}</textarea>"
-				paragraph "<b>${tvCount} TV Agent Devices</b>"
-				paragraph "<textarea rows=${tvCount + 1} cols=45 readonly='true'>${tvAgents}</textarea>"
-				paragraph "<b>${rcrCount} Remote Control Receiver Devices</b>"
-				paragraph "<textarea rows=${rcrCount + 1} cols=45 readonly='true'>${rcReceivers}</textarea>"
+			section("<b>Allow at least 2 minutes for discovery</b>") {
+				paragraph "<b>UPnP Devices Discovery Data</b>"
+				paragraph "<textarea rows=30 cols=50 readonly='true'>${devList}</textarea>"
 			}
-		section("Select App List (top left) to exit") {}
 	}
 }
 
 //	===== Start up Functions =====
 def setInitialStates() {
-	state.mediaPlayers = [:]
-	state.mainTvAgents = [:]
-	state.remoteControlRxs = [:]
+	state.ssdpDevices = [:]
+	state.devices = [:]
 }
 def installed() { initialize() }
 def updated() { initialize() }
@@ -109,95 +76,81 @@ def initialize() { unschedule() }
 
 //	===== Device Discovery =====
 void ssdpSubscribe() {
+	logInfo("ssdpSubscribe")
 	unsubscribe()
-	subscribe(location, "ssdpTerm.urn:schemas-upnp-org:device:MediaRenderer:1", mrHandler)
-	subscribe(location, "ssdpTerm.urn:samsung.com:device:MainTVServer2:1", tvHandler)
-	subscribe(location, "ssdpTerm.urn:samsung.com:device:RemoteControlReceiver:1", rcrHandler)
+	subscribe(location, "ssdpTerm.urn:schemas-upnp-org:device:MediaRenderer:1", ssdpHandler)
+	subscribe(location, "ssdpTerm.urn:samsung.com:device:MainTVServer2:1", ssdpHandler)
 }
 void ssdpDiscover() {
+	logInfo("ssdpDiscover")
 	sendHubCommand(new hubitat.device.HubAction("lan discovery urn:schemas-upnp-org:device:MediaRenderer:1", hubitat.device.Protocol.LAN))
+	pauseExecution(1000)
 	sendHubCommand(new hubitat.device.HubAction("lan discovery urn:samsung.com:device:MainTVServer2:1", hubitat.device.Protocol.LAN))
-	sendHubCommand(new hubitat.device.HubAction("lan discovery urn:samsung.com:device:RemoteControlReceiver:1", hubitat.device.Protocol.LAN))
-	runIn(5, addDeviceData)
+	pauseExecution(1000)
+	getDevData()
 }
-def mrHandler(evt) {
+def ssdpHandler(evt) {
 	def parsedEvent = parseLanMessage(evt.description)
-	def dni = parsedEvent.mac
-	def mediaPlayers = state.mediaPlayers
-	
-	def device = [:]
-	device["ip"] = convertHexToIP(parsedEvent.networkAddress)
-	device["ssdpPort"] = convertHexToInt(parsedEvent.deviceAddress)
-	device["ssdpPath"] = parsedEvent.ssdpPath
-	mediaPlayers << ["${dni}": device]
-}
-def tvHandler(evt) {
-	def parsedEvent = parseLanMessage(evt.description)
-	def dni = parsedEvent.mac
-	def mainTvAgents = state.mainTvAgents
-	
-	def device = [:]
-	device["ip"] = convertHexToIP(parsedEvent.networkAddress)
-	device["ssdpPort"] = convertHexToInt(parsedEvent.deviceAddress)
-	device["ssdpPath"] = parsedEvent.ssdpPath
-	mainTvAgents << ["${dni}": device]
-}
-def rcrHandler(evt) {
-	def parsedEvent = parseLanMessage(evt.description)
-	def dni = parsedEvent.mac
-	def remoteControlRxs = state.remoteControlRxs
-	
-	def device = [:]
-	device["ip"] = convertHexToIP(parsedEvent.networkAddress)
-	device["ssdpPort"] = convertHexToInt(parsedEvent.deviceAddress)
-	device["ssdpPath"] = parsedEvent.ssdpPath
-	remoteControlRxs << ["${dni}": device]
+	def ip = convertHexToIP(parsedEvent.networkAddress)
+	def path = parsedEvent.ssdpPath
+	def port = convertHexToInt(parsedEvent.deviceAddress)
+	def key = "${ip}:${path}${port}"
+
+	def devices = state.devices
+	device = [:]
+	device["dni"] = parsedEvent.mac
+	device["ip"] = ip
+	devices << ["${parsedEvent.mac}": device]
+	logInfo("ssdpHandler: found device dni = ${parsedEvent.mac}")
+
+	def ssdpDevices = state.ssdpDevices
+	ssdpDevice = [:]
+	ssdpDevice["ip"] = ip
+	ssdpDevice["port"] = port
+	ssdpDevice["path"] = path
+	ssdpDevices << ["${key}": ssdpDevice]
 }
 
-def addDeviceData() {
-	def players = state.mediaPlayers.findAll { !it?.value?.model }
-	players.each {
-	 	sendCmd(it.value.ssdpPath, it.value.ip, it.value.ssdpPort, "addPlayerData")
-	}
-	def tvAgents = state.mainTvAgents.findAll { !it?.value?.model }
-	players.each {
-	 	sendCmd(it.value.ssdpPath, it.value.ip, it.value.ssdpPort, "addTvAgentData")
-	}
-	def receivers = state.remoteControlRxs.findAll { !it?.value?.model }
-	players.each {
-	 	sendCmd(it.value.ssdpPath, it.value.ip, it.value.ssdpPort, "addReceiverData")
+def getDevData() {
+	def ssdpDevices = state.ssdpDevices
+	ssdpDevices.each {
+		logInfo("getDeviceData: path = ${it.value.ip}:${it.value.port}${it.value.path}")
+		sendCmd(it.value.path, it.value.ip, it.value.port, "addDeviceData")
+		pauseExecution(300)
 	}
 }
-void addPlayerData(resp) {
-	def mediaPlayers = state.mediaPlayers
-	def device = mediaPlayers.find {it?.key?.contains("${resp.mac}")}
+void addDeviceData(resp) {
+	def devices = state.devices
+	def device = devices.find { it.key == resp.mac }
 	if (device) {
-		device.value << [model: "${resp.xml.device.modelName}",
-						  name: "${resp.xml.device.friendlyName}"]
-	 }
+		def type = resp.xml.device.deviceType
+		def port = convertHexToInt(resp.port)
+		device.value << [manufacturer: "${resp.xml.device.manufacturer.text()}"]
+		def services = resp.xml.device.serviceList.service
+		services.each {
+			if (it.serviceType.text() == "urn:samsung.com:service:MainTVAgent2:1") {
+				device.value << [tvPort: "${port}",
+								 tvUrn: "${it.serviceType.text()}",
+								 tvPath: "${it.controlURL.text()}"]
+			} else if (it.serviceType.text() == "urn:schemas-upnp-org:service:AVTransport:1") {
+				device.value << [avPort: "${port}", 
+								 avUrn: "${it.serviceType.text()}",
+								 avPath: "${it.controlURL.text()}"]
+			} else if (it.serviceType.text() == "urn:schemas-upnp-org:service:RenderingControl:1") {
+				device.value << [rcPort: "${port}",
+								 rcUrn: "${it.serviceType.text()}",
+								 rcPath: "${it.controlURL.text()}"]
+			}
+		}
+	}
+	logInfo("addDeviceData: found data for device ${resp.mac}")
 }
-void addTvAgentData(resp) {
-	def mainTvAgents = state.mainTvAgents
-	def device = mainTvAgents.find {it?.key?.contains("${resp.mac}")}
-	if (device) {
-		device.value << [model: "${resp.xml.device.modelName}",
-						  name: "${resp.xml.device.friendlyName}"]
-	 }
-}
-void addReceiverData(resp) {
-	def remoteControlRxs = state.remoteControlRxs
-	def device = remoteControlRxs.find {it?.key?.contains("${resp.mac}")}
-	if (device) {
-		device.value << [model: "${resp.xml.device.modelName}",
-						  name: "${resp.xml.device.friendlyName}"]
-	 }
-}
-
 private sendCmd(command, deviceIP, devicePort, action){
-    def host = "${deviceIP}:${devicePort}"
-    def sendCmd =sendHubCommand(new hubitat.device.HubAction("""GET ${command} HTTP/1.1\r\nHOST: ${host}\r\n\r\n""",
-															 hubitat.device.Protocol.LAN, host, [callback: action]))
+	def host = "${deviceIP}:${devicePort}"
+    sendHubCommand(new hubitat.device.HubAction("""GET ${command} HTTP/1.1\r\nHOST: ${host}\r\n\r\n""",
+												hubitat.device.Protocol.LAN, host, [callback: action]))
 }
+
 def logWarn(message) {
 	log.warn "${appName()} ${appVersion()}: ${message}"
 }
